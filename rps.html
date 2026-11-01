@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حجر ورقة مقص 🪨✂️📄</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap');
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+        body {
+            background: radial-gradient(circle at top, #2d154a, #0d0416);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .status {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fbbf24;
+            text-shadow: 0 0 10px #f59e0b;
+            margin-bottom: 20px;
+            text-align: center;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 10px;
+            line-height: 1.4;
+        }
+
+        .arena {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 400px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 20px;
+            padding: 20px;
+            border: 2px solid #581c87;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .side { display: flex; flex-direction: column; align-items: center; width: 40%; }
+
+        .choice-emoji {
+            font-size: 80px;
+            line-height: 1;
+            transition: transform 0.3s;
+            filter: drop-shadow(0 0 15px rgba(255,255,255,0.2));
+        }
+
+        .vs { font-size: 28px; font-weight: 900; color: #ef4444; text-shadow: 0 0 15px #ef4444; }
+        .label { font-size: 14px; color: #9ca3af; margin-bottom: 10px; font-weight: bold; }
+
+        @keyframes shakeHand {
+            0% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(15deg) scale(1.1); }
+            50% { transform: rotate(-15deg) scale(1.1); }
+            75% { transform: rotate(10deg) scale(1.1); }
+            100% { transform: rotate(0deg) scale(1); }
+        }
+        .shaking { animation: shakeHand 0.5s ease-in-out infinite; }
+
+        .scoreboard {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 20px;
+            background: rgba(0,0,0,0.3);
+            padding: 10px 20px;
+            border-radius: 15px;
+            border: 1px solid #581c87;
+        }
+        .score-box { text-align: center; }
+        .score-box h4 { font-size: 14px; color: #9ca3af; margin-bottom: 5px; }
+        .score-box .val { font-size: 26px; font-weight: bold; }
+        .player-score { color: #60a5fa; }
+        .bot-score { color: #ef4444; }
+
+        .choices { display: flex; gap: 15px; margin-bottom: 20px; }
+
+        .choice-btn {
+            background: linear-gradient(145deg, #3d1b63, #211033);
+            border: 2px solid #a855f7;
+            border-radius: 15px;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        .choice-btn:active { transform: scale(0.9); border-color: #fbbf24; }
+        .choice-btn span { font-size: 45px; }
+
+        .btn-restart {
+            margin-top: 10px; padding: 12px 40px; background: linear-gradient(to bottom, #fbbf24, #d97706);
+            border: 2px solid #fff; border-radius: 12px; color: #000; font-size: 16px; font-weight: bold;
+            cursor: pointer; display: none; box-shadow: 0 5px 0 #92400e;
+        }
+        .btn-restart:active { transform: translateY(3px); box-shadow: 0 2px 0 #92400e; }
+        .btn-back { margin-top: 20px; text-decoration: none; color: #9ca3af; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <div class="status" id="statusText">اختر سلاحك، أنا مستعد لتحديك! 😎</div>
+
+    <div class="scoreboard">
+        <div class="score-box"><h4>أنت 👤</h4><div class="val player-score" id="playerScore">0</div></div>
+        <div class="score-box"><h4>الكمبيوتر 🤖</h4><div class="val bot-score" id="botScore">0</div></div>
+    </div>
+
+    <div class="arena">
+        <div class="side">
+            <div class="label">أنت</div>
+            <div id="playerChoice" class="choice-emoji">❓</div>
+        </div>
+        <div class="vs">VS</div>
+        <div class="side">
+            <div class="label">الكمبيوتر</div>
+            <div id="cpuChoice" class="choice-emoji">❓</div>
+        </div>
+    </div>
+
+    <div class="choices" id="choiceButtons">
+        <div class="choice-btn" onclick="play('rock')"><span>🪨</span></div>
+        <div class="choice-btn" onclick="play('paper')"><span>📄</span></div>
+        <div class="choice-btn" onclick="play('scissors')"><span>✂️</span></div>
+    </div>
+
+    <button class="btn-restart" id="restartBtn" onclick="startGame()">🔄 العب مرة أخرى</button>
+    <a href="index.html" class="btn-back">🔙 العودة للرئيسية</a>
+
+    <script>
+        let playerScore = 0;
+        let botScore = 0;
+        let gameOver = false;
+        const WIN_SCORE = 3;
+
+        const playerEl = document.getElementById('playerChoice');
+        const cpuEl = document.getElementById('cpuChoice');
+        const statusText = document.getElementById('statusText');
+        const playerScoreEl = document.getElementById('playerScore');
+        const botScoreEl = document.getElementById('botScore');
+        const choiceButtons = document.getElementById('choiceButtons');
+        const restartBtn = document.getElementById('restartBtn');
+
+        const emojis = { rock: '🪨', paper: '📄', scissors: '✂️' };
+        const namesAr = { rock: 'حجر 🪨', paper: 'ورقة 📄', scissors: 'مقص ✂️' };
+
+        function play(playerChoice) {
+            if (gameOver) return;
+
+            choiceButtons.style.pointerEvents = 'none';
+            playerEl.classList.add('shaking');
+            cpuEl.classList.add('shaking');
+            
+            statusText.innerText = "جاري اللعب... ⏳";
+            statusText.style.color = "#fbbf24";
+
+            const choices = ['rock', 'paper', 'scissors'];
+            const cpuChoice = choices[Math.floor(Math.random() * 3)];
+
+            setTimeout(() => {
+                playerEl.innerText = emojis[playerChoice];
+                cpuEl.innerText = emojis[cpuChoice];
+                
+                playerEl.classList.remove('shaking');
+                cpuEl.classList.remove('shaking');
+
+                let resultText = "";
+                
+                if (playerChoice === cpuChoice) {
+                    const drawMessages = [
+                        `تعادل! كلانا اخترنا ${namesAr[playerChoice]}، بس أنا أكيد راح أفوز! 😏`,
+                        `تعادل! ${namesAr[playerChoice]}! المرة الجاية ما راح ترحمك! 😈`
+                    ];
+                    resultText = drawMessages[Math.floor(Math.random() * drawMessages.length)];
+                    statusText.style.color = "#fbbf24";
+                } else if (
+                    (playerChoice === 'rock' && cpuChoice === 'scissors') ||
+                    (playerChoice === 'paper' && cpuChoice === 'rock') ||
+                    (playerChoice === 'scissors' && cpuChoice === 'paper')
+                ) {
+                    playerScore++;
+                    const winMessages = [
+                        `حظ سعيد! أنا اخترت ${namesAr[cpuChoice]} وأنت ${namesAr[playerChoice]}.. لكن المرة الجاية ما راح ترحمك! 😡`,
+                        `لقد فزت! اخترت ${namesAr[cpuChoice]}.. بس لا تفرح كثيراً، أنا فقط أختبرك! 😏`
+                    ];
+                    resultText = winMessages[Math.floor(Math.random() * winMessages.length)];
+                    statusText.style.color = "#22c55e";
+                } else {
+                    botScore++;
+                    const loseMessages = [
+                        `ههههههه! 😂 أنا اخترت ${namesAr[cpuChoice]} وأنت ${namesAr[playerChoice]}.. أنا الأسطورة!`,
+                        `خسرت! 🤣 كان اختياري ${namesAr[cpuChoice]}.. أنا دائماً أفوز!`,
+                        `للأسف! ${namesAr[cpuChoice]} أقوى من ${namesAr[playerChoice]}! 😎 تعلم اللعب أولاً.`
+                    ];
+                    resultText = loseMessages[Math.floor(Math.random() * loseMessages.length)];
+                    statusText.style.color = "#ef4444";
+                }
+                
+                statusText.innerText = resultText;
+                updateUI();
+
+                if (playerScore >= WIN_SCORE) {
+                    endGame("🎉 مبروك! لقد فزت باللعبة! أنت محترف.. بس المرة الجاية سأحطمك! 🏆", "#22c55e");
+                } else if (botScore >= WIN_SCORE) {
+                    endGame("😢 للأسف! أنا فزت باللعبة. هههههه! 😂 تدرب أكثر وارجع تحداني.", "#ef4444");
+                } else {
+                    choiceButtons.style.pointerEvents = 'auto';
+                }
+            }, 800); 
+        }
+
+        function updateUI() {
+            playerScoreEl.innerText = playerScore;
+            botScoreEl.innerText = botScore;
+        }
+
+        function endGame(message, color) {
+            gameOver = true;
+            statusText.innerText = message;
+            statusText.style.color = color;
+            restartBtn.style.display = 'block';
+            choiceButtons.style.display = 'none';
+        }
+
+        function startGame() {
+            playerScore = 0;
+            botScore = 0;
+            gameOver = false;
+            updateUI();
+            statusText.innerText = "اختر سلاحك، أنا مستعد لتحديك! 😎";
+            statusText.style.color = "#fbbf24";
+            restartBtn.style.display = 'none';
+            choiceButtons.style.display = 'flex';
+            choiceButtons.style.pointerEvents = 'auto';
+            
+            playerEl.innerText = '❓';
+            cpuEl.innerText = '❓';
+        }
+
+        startGame();
+    </script>
+</body>
+                                                     </html>
