@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة القنابل 💣</title>
+    <style>
+        * { box-sizing: border-box; font-family: Tahoma, sans-serif; margin: 0; padding: 0; }
+        body {
+            background: radial-gradient(circle at top, #2d154a, #0d0416);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+        
+        .status {
+            font-size: 22px;
+            font-weight: bold;
+            color: #fbbf24;
+            text-shadow: 0 0 10px #f59e0b;
+            margin-bottom: 20px;
+            text-align: center;
+            height: 35px;
+        }
+
+        .scoreboard {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 350px;
+            margin-bottom: 20px;
+            background: rgba(0,0,0,0.5);
+            padding: 10px 20px;
+            border-radius: 15px;
+            border: 2px solid #581c87;
+        }
+        .score-box { text-align: center; }
+        .score-box h3 { font-size: 14px; color: #9ca3af; margin-bottom: 5px; }
+        .score-box .val { font-size: 24px; font-weight: bold; }
+        .player-score { color: #60a5fa; }
+        .bot-score { color: #ef4444; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            width: 100%;
+            max-width: 350px;
+        }
+        
+        .box {
+            background: linear-gradient(145deg, #4c1d95, #2e1065);
+            border: 2px solid #7c3aed;
+            border-radius: 15px;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 45px;
+            cursor: pointer;
+            transition: all 0.3s;
+            user-select: none;
+            box-shadow: 0 5px 0 #1e0a3c, 0 8px 15px rgba(0,0,0,0.6);
+        }
+        
+        .grid.locked .box { cursor: not-allowed; opacity: 0.8; }
+
+        .box.opened { background: #150a24; border-color: #333; cursor: default; box-shadow: inset 0 0 15px #000; transform: scale(0.95); }
+        .box.bomb { background: radial-gradient(circle, #b91c1c, #7f1d1d); border-color: #ef4444; box-shadow: 0 0 20px #ef4444; }
+        .box.prize { background: radial-gradient(circle, #15803d, #064e3b); border-color: #22c55e; box-shadow: 0 0 20px #22c55e; }
+
+        @keyframes pop { 0% { transform: scale(0.5); } 100% { transform: scale(1); } }
+        .anim { animation: pop 0.3s ease-out; }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        .shake { animation: shake 0.4s; }
+
+        .btn-restart {
+            margin-top: 30px; padding: 15px 40px; background: linear-gradient(to bottom, #fbbf24, #d97706);
+            border: 2px solid #fff; border-radius: 12px; color: #000; font-size: 18px; font-weight: bold;
+            cursor: pointer; display: none; box-shadow: 0 5px 0 #92400e;
+        }
+        .btn-restart:active { transform: translateY(3px); box-shadow: 0 2px 0 #92400e; }
+        .btn-back { margin-top: 20px; text-decoration: none; color: #9ca3af; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <div class="status" id="statusText">دورك يا بطل! 🎮</div>
+
+    <div class="scoreboard">
+        <div class="score-box">
+            <h3>أنت 👤</h3>
+            <div class="val player-score" id="playerScore">0</div>
+        </div>
+        <div class="score-box">
+            <h3>الكمبيوتر 🤖</h3>
+            <div class="val bot-score" id="botScore">0</div>
+        </div>
+    </div>
+
+    <div class="grid" id="gameGrid"></div>
+
+    <button class="btn-restart" id="restartBtn" onclick="startGame()">🔄 العب مرة أخرى</button>
+    <a href="index.html" class="btn-back">🔙 العودة للرئيسية</a>
+
+    <script>
+        const TOTAL_BOXES = 12;
+        const TOTAL_BOMBS = 3;
+        const WIN_SCORE = 5;
+        
+        let bombs = [];
+        let playerScore = 0;
+        let botScore = 0;
+        let playerTurn = true;
+        let gameOver = false;
+
+        const gameGrid = document.getElementById('gameGrid');
+        const statusText = document.getElementById('statusText');
+        const playerScoreEl = document.getElementById('playerScore');
+        const botScoreEl = document.getElementById('botScore');
+        const restartBtn = document.getElementById('restartBtn');
+
+        function startGame() {
+            playerScore = 0;
+            botScore = 0;
+            playerTurn = true;
+            gameOver = false;
+            bombs = [];
+            
+            gameGrid.innerHTML = '';
+            gameGrid.classList.remove('locked');
+            restartBtn.style.display = 'none';
+            updateUI();
+            
+            statusText.innerText = "دورك يا بطل! 🎮";
+            statusText.style.color = "#60a5fa";
+
+            while (bombs.length < TOTAL_BOMBS) {
+                let r = Math.floor(Math.random() * TOTAL_BOXES);
+                if (!bombs.includes(r)) bombs.push(r);
+            }
+
+            for (let i = 0; i < TOTAL_BOXES; i++) {
+                const box = document.createElement('div');
+                box.classList.add('box');
+                box.innerText = '🎁';
+                box.onclick = () => handleBoxClick(i, box);
+                gameGrid.appendChild(box);
+            }
+        }
+
+        function handleBoxClick(index, box) {
+            if (!playerTurn || gameOver || box.classList.contains('opened')) return;
+            
+            playerTurn = false;
+            gameGrid.classList.add('locked');
+            box.classList.add('opened', 'anim');
+
+            if (bombs.includes(index)) {
+                box.innerText = '💣';
+                box.classList.add('bomb');
+                statusText.innerText = "أوه! انفجرت قنبلة! 💥";
+                statusText.style.color = "#ef4444";
+                
+                document.body.classList.add('shake');
+                setTimeout(() => document.body.classList.remove('shake'), 400);
+                
+                setTimeout(botTurn, 1000);
+            } else {
+                box.innerText = '🪙';
+                box.classList.add('prize');
+                playerScore++;
+                updateUI();
+
+                if (playerScore >= WIN_SCORE) {
+                    endGame("🎉 مبروك! لقد فزت باللعبة! 🏆", "#22c55e");
+                } else {
+                    setTimeout(botTurn, 800);
+                }
+            }
+        }
+
+        function botTurn() {
+            if (gameOver) return;
+
+            statusText.innerText = "الكمبيوتر يفكر... 🤖";
+            statusText.style.color = "#ef4444";
+
+            let available = [];
+            for (let i = 0; i < TOTAL_BOXES; i++) {
+                if (!gameGrid.children[i].classList.contains('opened')) {
+                    available.push(i);
+                }
+            }
+
+            if (available.length === 0) return;
+
+            let randomIndex = available[Math.floor(Math.random() * available.length)];
+            let box = gameGrid.children[randomIndex];
+            
+            box.classList.add('opened', 'anim');
+
+            if (bombs.includes(randomIndex)) {
+                box.innerText = '💣';
+                box.classList.add('bomb');
+                statusText.innerText = "الكمبيوتر ضرب قنبلة! 💥";
+                statusText.style.color = "#22c55e";
+            } else {
+                box.innerText = '🪙';
+                box.classList.add('prize');
+                botScore++;
+                updateUI();
+
+                if (botScore >= WIN_SCORE) {
+                    endGame("😢 للأسف! الكمبيوتر فاز باللعبة. لقد خسرت.", "#ef4444");
+                    return;
+                }
+            }
+
+            if (!gameOver) {
+                playerTurn = true;
+                gameGrid.classList.remove('locked');
+                statusText.innerText = "دورك يا بطل! 🎮";
+                statusText.style.color = "#60a5fa";
+            }
+        }
+
+        function updateUI() {
+            playerScoreEl.innerText = playerScore;
+            botScoreEl.innerText = botScore;
+        }
+
+        function endGame(message, color) {
+            gameOver = true;
+            statusText.innerText = message;
+            statusText.style.color = color;
+            restartBtn.style.display = 'block';
+            gameGrid.classList.add('locked');
+
+            for (let i = 0; i < TOTAL_BOXES; i++) {
+                if (bombs.includes(i) && !gameGrid.children[i].classList.contains('opened')) {
+                    gameGrid.children[i].innerText = '💣';
+                    gameGrid.children[i].classList.add('bomb');
+                    gameGrid.children[i].classList.add('opened');
+                }
+            }
+        }
+
+        startGame();
+    </script>
+</body>
+          </html>
