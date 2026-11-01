@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لو خيروك 🎭</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap');
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+        body {
+            background: radial-gradient(circle at top, #2d154a, #0d0416);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px 15px;
+        }
+
+        .header-title {
+            font-size: 32px;
+            font-weight: 900;
+            background: linear-gradient(to bottom, #fbbf24, #b45309);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+        }
+
+        .question-card {
+            background: rgba(45, 21, 74, 0.8);
+            border: 2px solid #a855f7;
+            border-radius: 20px;
+            padding: 25px 20px;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            margin-bottom: 20px;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .question-text {
+            font-size: 22px;
+            font-weight: 900;
+            color: #fff;
+            line-height: 1.4;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            max-width: 450px;
+            margin-bottom: 20px;
+        }
+
+        .option-btn {
+            background: linear-gradient(145deg, #3d1b63, #211033);
+            border: 2px solid #7c3aed;
+            border-radius: 15px;
+            padding: 15px;
+            font-size: 17px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 5px 0 #1e0a3c;
+            font-family: 'Cairo', sans-serif;
+        }
+        .option-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #1e0a3c; }
+
+        .interaction-section {
+            display: none;
+            width: 100%;
+            max-width: 450px;
+            flex-direction: column;
+            gap: 15px;
+            animation: fadeIn 0.4s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .bot-box {
+            background: rgba(0,0,0,0.5);
+            border: 2px solid #22c55e;
+            border-radius: 15px;
+            padding: 20px;
+            font-size: 17px;
+            color: #86efac;
+            line-height: 1.6;
+            text-align: center;
+        }
+        .bot-box span { font-size: 24px; margin-left: 5px;}
+
+        .next-btn {
+            background: linear-gradient(to bottom, #22c55e, #15803d);
+            border: 2px solid #4ade80; border-radius: 15px; padding: 18px;
+            font-size: 20px; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 5px 0 #14532d;
+            width: 100%; margin-top: 10px;
+            font-family: 'Cairo', sans-serif;
+        }
+        .next-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #14532d; }
+
+        .btn-back { margin-top: 30px; text-decoration: none; color: #9ca3af; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <div class="header-title">لو خيروك 🎭</div>
+
+    <div class="question-card" id="questionCard">
+        <div class="question-text" id="questionText"></div>
+    </div>
+
+    <div class="options" id="optionsContainer">
+        <button class="option-btn" id="opt1Btn" onclick="chooseOption(1)"></button>
+        <button class="option-btn" id="opt2Btn" onclick="chooseOption(2)"></button>
+    </div>
+
+    <div class="interaction-section" id="interactionSection">
+        <div class="bot-box" id="botChoiceBox"></div>
+        <button class="next-btn" id="nextBtn" onclick="nextQuestion()">بریم سوال بعدی؟ ➡️</button>
+    </div>
+
+    <a href="index.html" class="btn-back">🔙 العودة للرئيسية</a>
+
+    <script>
+        const questions = [
+            { opt1: "مال لا نهاية له 💰", opt2: "الحب الحقيقي ❤️" },
+            { opt1: "تكون ذكي جداً 🧠", opt2: "تكون جميل جداً 😎" },
+            { opt1: "تسافر حول العالم ✈️", opt2: "تعيش في قصر فخم 🏰" },
+            { opt1: "تأكل البيتزا forever 🍕", opt2: "تأكل البرجر forever 🍔" },
+            { opt1: "تعرف كل أسرار الناس 🤫", opt2: "تقرأ أفكارهم 📖" },
+            { opt1: "تكون رئيس العالم 👑", opt2: "تكون أشهر شخص في التاريخ 🌟" },
+            { opt1: "تفقد حاسة السمع 🦻", opt2: "تفقد حاسة البصر 👁️" },
+            { opt1: "تكون غني بس بخيل 💵", opt2: "تكون فقير بس كريم 🤲" },
+            { opt1: "تكون بطل خارق 🦸‍♂️", opt2: "تكون شرير عبقري 🦹‍♂️" },
+            { opt1: "تعيش بدون انترنت ❌", opt2: "تعيش بدون هاتف 📵" },
+            { opt1: "تعرف متى تموت ⏳", opt2: "تعرف كيف تموت 💀" },
+            { opt1: "تكون أصغر شخص في الشركة 👶", opt2: "تكون أكبر شخص في الشركة 👴" },
+            { opt1: "تأكل طعام حار جداً 🌶️", opt2: "تأكل طعام حلو جداً 🍭" },
+            { opt1: "تتزوج شخص تحبه وهو ما يحبك 💔", opt2: "يتزوجك شخص تحبه وهو يحبك ❤️" },
+            { opt1: "تكون مشهور بس مكروه 😒", opt2: "تكون مجهول بس محبوب 🥰" },
+            { opt1: "تكون عبقري في الرياضيات 🧮", opt2: "تكون عبقري في اللغات 🗣️" },
+            { opt1: "تسكن في الغابة 🌲", opt2: "تسكن في الصحراء 🏜️" },
+            { opt1: "تكون ملك المال 💸", opt2: "تكون ملك القلوب 💖" },
+            { opt1: "تسافر للماضي ⏪", opt2: "تسافر للمستقبل ⏩" },
+            { opt1: "تكون طيار ✈️", opt2: "تكون قبطان سفينة 🚢" },
+            { opt1: "تتحدث كل لغات العالم 🗣️", opt2: "تعزف كل الآلات الموسيقية 🎸" },
+            { opt1: "تعيش في كهف مظلم 🦇", opt2: "تعيش في برج عالي 🌃" },
+            { opt1: "تكون رئيس دولة 👔", opt2: "تكون مدير شركة كبيرة 🏢" },
+            { opt1: "تأكل نفس الأكل كل يوم 🍽️", opt2: "تنام 12 ساعة كل يوم 😴" },
+            { opt1: "تكون معروف بالشجاعة 🦁", opt2: "تكون معروف بالحكمة 🦉" },
+            { opt1: "تشتري سيارة فخمة 🚗", opt2: "تشتري بيت كبير 🏡" },
+            { opt1: "تعيش في زمن الديناصورات 🦖", opt2: "تعيش في زمن الفضاء 🚀" },
+            { opt1: "تكون دائماً متأخراً ⏰", opt2: "تكون دائماً في الموعد ⏱️" },
+            { opt1: "تفقد ذاكرتك 🧠", opt2: "تفقد حاسة التذوق 👅" },
+            { opt1: "تكون نجماً في السينما 🎬", opt2: "تكون نجماً في الرياضة ⚽" },
+            { opt1: "تسافر إلى القمر 🌕", opt2: "تسافر إلى أعماق البحر 🌊" },
+            { opt1: "تتحدث مع الحيوانات 🐶", opt2: "تتحدث مع الأشباح 👻" },
+            { opt1: "تكون أطول شخص في العالم 📏", opt2: "تكون أقصر شخص في العالم 📐" },
+            { opt1: "تأكل الأكل الحار 🌶️", opt2: "تأكل الأكل الحامض 🍋" },
+            { opt1: "تكون مغني مشهور 🎤", opt2: "تكون كاتب مشهور ✍️" },
+            { opt1: "تعيش في جزيرة 🏝️", opt2: "تعيش في جبل 🏔️" },
+            { opt1: "تمتلك طائرة خاصة 🛩️", opt2: "تمتلك يخت خاص 🛥️" },
+            { opt1: "تكون صديق لشخصية كرتونية 🐭", opt2: "تكون صديق لشخصية تاريخية 👑" },
+            { opt1: "تكون فيلم رعب 😱", opt2: "تكون فيلم كوميدي 😂" },
+            { opt1: "تكون بطل في لعبة 🎮", opt2: "تكون بطل في فيلم 🎥" },
+            { opt1: "تعيش في المستقبل البعيد 🛸", opt2: "تعيش في الماضي القديم 🏺" },
+            { opt1: "تكون دائماً سعيداً 😊", opt2: "تكون دائماً غنياً 💵" },
+            { opt1: "تكون ملك الغابة 🦁", opt2: "تكون ملك السماء 🦅" },
+            { opt1: "تاكل الحلويات يومياً 🍰", opt2: "تاكل الفواكه يومياً 🍎" },
+            { opt1: "تكون عالم في الفيزياء 🔭", opt2: "تكون عالم في الكيمياء 🧪" },
+            { opt1: "تمتلك شركة طيران ✈️", opt2: "تمتلك شركة سيارات 🚘" },
+            { opt1: "تعيش في عالم افتراضي 🕶️", opt2: "تعيش في عالم حقيقي 🌍" },
+            { opt1: "تكون رئيس وزراء 👔", opt2: "تكون سفير دولة 🎖️" },
+            { opt1: "تكون دائماً مشغول 🏃‍♂️", opt2: "تكون دائماً فاضي 🛋️" },
+            { opt1: "تكون بطل في قصة 🦸", opt2: "تكون شرير في قصة 🦹" },
+            { opt1: "تكون رياضياً محترفاً 🏅", opt2: "تكون فناناً محترفاً 🎨" },
+            { opt1: "تكون رئيس تحرير مجلة 📰", opt2: "تكون مخرج سينمائي 🎬" },
+            { opt1: "تعرف كل شيء عن الفضاء 🌌", opt2: "تعرف كل شيء عن الأرض 🌍" },
+            { opt1: "تكون صاحب فندق فخم 🏨", opt2: "تكون صاحب مطعم مشهور 🍽️" },
+            { opt1: "تكون محققاً ذكياً 🕵️", opt2: "تكون طبيباً ماهراً 🩺" },
+            { opt1: "تكون مبرمجاً عبقرياً 💻", opt2: "تكون مهندساً بارعاً 📐" },
+            { opt1: "تعيش في لندن 🇬🇧", opt2: "تعيش في طوكيو 🇯🇵" },
+            { opt1: "تكون لاعب كرة قدم ⚽", opt2: "تكون لاعب كرة سلة 🏀" },
+            { opt1: "تكون مديراً تنفيذياً 💼", opt2: "تكون موظفاً بسيطاً 👨‍💼" },
+            { opt1: "تكون طيار حربي 🛩️", opt2: "تكون قائد سفينة فضاء 🚀" },
+            { opt1: "تعيش بدون موسيقى 🎵", opt2: "تعيش بدون أفلام 🎬" },
+            { opt1: "تكون شخصاً صبوراً 🧘‍♂️", opt2: "تكون شخصاً طموحاً 🚀" },
+            { opt1: "تكون مغامراً 🧗‍♂️", opt2: "تكون هادئاً 🧘" },
+            { opt1: "تكون صديقاً وفياً 🤝", opt2: "تكون شخصاً مستقلاً 🦅" },
+            { opt1: "تعيش في منزل خشبي 🪵", opt2: "تعيش في شقة زجاجية 🪟" },
+            { opt1: "تكون ملك الملوك 👑", opt2: "تكون قاضي القضاة ⚖️" },
+            { opt1: "تمتلك مجموعة سيارات 🚗", opt2: "تمتلك مجموعة ساعات ⌚" },
+            { opt1: "تكون دائماً صادقاً 💯", opt2: "تكون دائماً لطيفاً 😊" },
+            { opt1: "تكون صياداً ماهراً 🎣", opt2: "تكون مزارعاً ناجحاً 🌾" },
+            { opt1: "تكون مصوراً محترفاً 📸", opt2: "تكون رساماً بارعاً 🎨" },
+            { opt1: "تعيش في بلد بارد ❄️", opt2: "تعيش في بلد حار ☀️" },
+            { opt1: "تكون رئيساً لجامعة 🎓", opt2: "تكون رئيساً لشركة 💼" },
+            { opt1: "تكون بطل في سباق 🏎️", opt2: "تكون بطل في مبارزة 🤺" },
+            { opt1: "تكون خبيراً في التكنولوجيا 📱", opt2: "تكون خبيراً في الطبيعة 🌿" },
+            { opt1: "تعيش في عالم من الورق 📄", opt2: "تعيش في عالم من المعدن ⚙️" },
+            { opt1: "تكون لاعب شطرنج محترف ♟️", opt2: "تكون لاعب بلياردو محترف 🎱" },
+            { opt1: "تكون دائماً محاطاً بالأصدقاء 👥", opt2: "تكون دائماً وحيداً 🚶" },
+            { opt1: "تكون ملك الغابة 🦁", opt2: "تكون ملك البحار 🐋" },
+            { opt1: "تأكل بيتزا بالأناناس 🍍", opt2: "تأكل برجر بالشوكولاتة 🍫" },
+            { opt1: "تعيش في مدينة صاخبة 🏙️", opt2: "تعيش في قرية هادئة 🏡" },
+            { opt1: "تكون طبيب أسنان 🦷", opt2: "تكون طبيب عيون 👁️" },
+            { opt1: "تكون مضيف طيران ✈️", opt2: "تكون طاهي مشهور 👨‍🍳" },
+            { opt1: "تكون مرشد سياحي 🗺️", opt2: "تكون مترجم لغات 🗣️" },
+            { opt1: "تعيش في عالم الحيوان 🐾", opt2: "تعيش في عالم النبات 🌱" },
+            { opt1: "تكون مدرب رياضي 🏋️", opt2: "تكون معلم مدرسة 🏫" },
+            { opt1: "تكون لديك ذاكرة خارقة 🧠", opt2: "تكون لديك سرعة خارقة 🏃" },
+            { opt1: "تكون دائماً في المقدمة 🥇", opt2: "تكون دائماً في الخلف 🥈" },
+            { opt1: "تعيش في كتاب 📚", opt2: "تعيش في لوحة 🎨" },
+            { opt1: "تكون رجل أعمال 💼", opt2: "تكون موظف حكومي 🏛️" },
+            { opt1: "تكون صانع محتوى 📹", opt2: "تكون مبرمج ألعاب 🎮" },
+            { opt1: "تكون رجل فضاء 🧑‍🚀", opt2: "تكون غواصاً 🌊" },
+            { opt1: "تكون حارس أمن 💂", opt2: "تكون حارس شخصي 🕴️" },
+            { opt1: "تعيش في عالم من الخيال 🧚", opt2: "تعيش في عالم من الواقع 🌍" },
+            { opt1: "تكون لديك قدرة الطيران 🦅", opt2: "تكون لديك قدرة الاختفاء 🫥" },
+            { opt1: "تكون ثرياً جداً 💎", opt2: "تكون سعيداً جداً 😊" },
+            { opt1: "تكون دائماً الأول 🥇", opt2: "تكون دائماً الثاني 🥈" },
+            { opt1: "تعيش في برج عاجي 🏰", opt2: "تعيش في كوخ خشبي 🛖" },
+            { opt1: "تكون ملك التكنولوجيا 🤖", opt2: "تكون ملك الطبيعة 🌳" },
+            { opt1: "تكون بطل خارق في مدينة 🏙️", opt2: "تكون بطل خارق في قرية 🏡" },
+            { opt1: "تكون صديقاً للجميع 🤝", opt2: "تكون صديقاً لنفسك 🪞" },
+            { opt1: "تكون في قصة خيالية 🧚‍♀️", opt2: "تكون في قصة واقعية 📖" }
+        ];
+
+        let currentQuestion = null;
+        const questionCard = document.getElementById('questionCard');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const interactionSection = document.getElementById('interactionSection');
+        const botChoiceBox = document.getElementById('botChoiceBox');
+        const questionText = document.getElementById('questionText');
+        const nextBtn = document.getElementById('nextBtn');
+
+        function loadQuestion() {
+            questionCard.style.display = 'flex';
+            optionsContainer.style.display = 'flex';
+            interactionSection.style.display = 'none';
+            currentQuestion = questions[Math.floor(Math.random() * questions.length)];
+            questionText.innerText = currentQuestion.opt1 + " أم " + currentQuestion.opt2;
+            document.getElementById('opt1Btn').innerText = currentQuestion.opt1;
+            document.getElementById('opt2Btn').innerText = currentQuestion.opt2;
+        }
+
+        function chooseOption(choice) {
+            let selectedText = choice === 1 ? currentQuestion.opt1 : currentQuestion.opt2;
+            let botChoiceText = choice === 1 ? currentQuestion.opt2 : currentQuestion.opt1;
+            questionCard.style.display = 'none';
+            optionsContainer.style.display = 'none';
+            const botReplies = [
+                `لقد اخترت <b>${selectedText}</b>! أنا لو مكانك كنت اخترت <b>${botChoiceText}</b>، بس اختيارك مقبول. 😏`,
+                `أها! اخترت <b>${selectedText}</b>؟ أنا شخصياً أفضل <b>${botChoiceText}</b>، بس يلا معليش. 🤷‍♂️`,
+                `اختيار غريب! <b>${selectedText}</b>! أنا مستحيل أختار غير <b>${botChoiceText}</b>. 😂`,
+                `عاش! <b>${selectedText}</b> اختيار جبار، بس أنا كنت بختار <b>${botChoiceText}</b>. 😎`
+            ];
+            botChoiceBox.innerHTML = `<span>🤖</span> الكمبيوتر يقول:<br><br>${botReplies[Math.floor(Math.random() * botReplies.length)]}`;
+            interactionSection.style.display = 'flex';
+        }
+
+        function nextQuestion() { loadQuestion(); }
+
+        loadQuestion();
+    </script>
+</body>
+  </html>
