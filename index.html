@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>قناة لحظه ادراك</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+        body { background: radial-gradient(circle at top, #2d154a, #0d0416); color: white; display: flex; justify-content: center; min-height: 100vh; }
+        .app-container { width: 100%; max-width: 480px; padding: 15px; padding-bottom: 80px; }
+        
+        .social-section {
+            background: linear-gradient(145deg, rgba(61, 27, 99, 0.6), rgba(33, 16, 51, 0.8));
+            border: 1px solid #581c87;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        .social-title { font-size: 15px; color: #fbbf24; margin-bottom: 12px; text-align: center; font-weight: 900; text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);}
+        
+        .btn-social {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 15px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: white;
+            font-weight: 900;
+            font-size: 16px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.4);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .btn-social:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,0.4); }
+        .btn-social span { display: flex; align-items: center; gap: 10px; font-size: 20px;}
+        
+        .btn-channel-main { background: linear-gradient(90deg, #d97706, #b45309); border: 2px solid #fbbf24; }
+        .btn-channel-second { background: linear-gradient(90deg, #7e22ce, #4c1d95); border: 2px solid #c084fc; }
+        .btn-bot { background: linear-gradient(90deg, #2563eb, #1e3a8a); border: 2px solid #60a5fa; }
+        .btn-bot-channel { background: linear-gradient(90deg, #059669, #064e3b); border: 2px solid #34d399; }
+
+        .logo-section { text-align: center; margin-bottom: 25px; margin-top: 10px; }
+        .logo-section h1 { font-size: 34px; font-weight: 900; background: linear-gradient(to bottom, #fbbf24, #b45309); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 5px; }
+        
+        .channel-id { color: #c084fc; font-size: 18px; font-weight: bold; direction: ltr; display: inline-block; margin-top: 5px; }
+
+        .games-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        
+        .game-card { 
+            background: linear-gradient(145deg, #2d154a, #150a24); 
+            border: 2px solid #581c87; 
+            border-radius: 15px; 
+            padding: 15px; 
+            text-align: center; 
+            cursor: pointer; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
+            transition: transform 0.2s; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 130px;
+        }
+        .game-card:active { transform: scale(0.95); }
+        
+        .game-img { width: 60px; height: 60px; object-fit: contain; margin-bottom: 10px; filter: drop-shadow(0 0 10px rgba(255,255,255,0.2)); }
+        .game-emoji { font-size: 45px; height: 60px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; line-height: 1; }
+        
+        .game-title { font-weight: 700; font-size: 15px; margin-bottom: 5px; color: #fff; }
+        .game-desc { font-size: 11px; color: #9ca3af; }
+
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 480px; background: #110720; border-top: 2px solid #3d1b63; display: flex; justify-content: space-around; padding: 10px 0; z-index: 100; }
+        .nav-item { text-align: center; color: #6b7280; font-size: 12px; }
+        .nav-item.active { color: #fbbf24; }
+        .nav-icon { font-size: 20px; display: block; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    
+    <div class="social-section">
+        <div class="social-title">✨ تابعنا والعب معنا ✨</div>
+        <a href="https://rubika.ir/UIIXUIl" target="_blank" class="btn-social btn-channel-main">
+            <span>📢 قناة لحظة إدراك</span>
+            <span>🚀</span>
+        </a>
+        <a href="https://rubika.ir/llUoUll" target="_blank" class="btn-social btn-channel-second">
+            <span>🌟 هل أنت بخير</span>
+            <span>💜</span>
+        </a>
+        <a href="https://rubika.ir/AboSabirBot" target="_blank" class="btn-social btn-bot">
+            <span>🤖 بوت الألعاب</span>
+            <span>🎮</span>
+        </a>
+        <a href="https://rubika.ir/AboSabir" target="_blank" class="btn-social btn-bot-channel">
+            <span>📱 قناة البوت</span>
+            <span>🤖</span>
+        </a>
+    </div>
+
+    <div class="logo-section">
+        <h1>قناة لحظه ادراك</h1>
+        <div class="channel-id">- rubik . @UIIXUIl '𖣂</div>
+    </div>
+
+    <div class="games-grid">
+        <div class="game-card" onclick="openGame('حافظه')">
+            <div class="game-emoji" style="font-size: 45px; text-shadow: 0 0 15px rgba(192, 132, 252, 0.5);">🧠</div>
+            <div class="game-title">لعبة التصاوير</div>
+            <div class="game-desc">اكتشف الأزواج</div>
+        </div>
+        
+        <div class="game-card" onclick="openGame('حجر ورقة مقص')">
+            <div class="game-emoji" style="font-size: 38px; letter-spacing: 2px;">🪨📝✂️</div>
+            <div class="game-title">حجر ورقة مقص</div>
+            <div class="game-desc">العب بذكاء</div>
+        </div>
+        
+        <div class="game-card" onclick="openGame('بمب')">
+            <div class="game-emoji">💣</div>
+            <div class="game-title">بمب</div>
+            <div class="game-desc">كن الأسرع</div>
+        </div>
+        
+        <div class="game-card" onclick="openGame('X O')">
+            <img src="https://cdn-icons-png.flaticon.com/512/566/566294.png" class="game-img">
+            <div class="game-title">X O</div>
+            <div class="game-desc">العب ضد الكمبيوتر</div>
+        </div>
+        
+        <div class="game-card" onclick="openGame('لو خيروك')">
+            <div class="game-emoji" style="color: #fbbf24; text-shadow: 0 0 15px #fbbf24;">❓</div>
+            <div class="game-title">لو خيروك</div>
+            <div class="game-desc">اختر بحكمة</div>
+        </div>
+        
+        <div class="game-card" onclick="openGame('ترتيب الحروف')">
+            <div class="game-emoji" style="font-size: 22px; font-weight: 900; color: #c084fc; text-shadow: 0 0 10px rgba(192, 132, 252, 0.5);">ترتيب الحروف</div>
+            <div class="game-desc">بلا حدود</div>
+        </div>
+    </div>
+</div>
+
+<div class="bottom-nav">
+    <div class="nav-item active"><span class="nav-icon">🏠</span>الرئيسية</div>
+    <div class="nav-item"><span class="nav-icon">🎁</span>الجوائز</div>
+    <div class="nav-item"><span class="nav-icon">🏆</span>الترتيب</div>
+    <div class="nav-item"><span class="nav-icon">👥</span>الأصدقاء</div>
+</div>
+
+<script>
+    function openGame(gameName) {
+        if (gameName === 'بمب') {
+            window.location.href = 'bomb.html';
+        } else if (gameName === 'حجر ورقة مقص') {
+            window.location.href = 'rps.html';
+        } else if (gameName === 'لو خيروك') {
+            window.location.href = 'would.html';
+        } else if (gameName === 'ترتيب الحروف') {
+            window.location.href = 'words.html';
+        } else if (gameName === 'X O') {
+            window.location.href = 'x_o.html';
+        } else if (gameName === 'حافظه') {
+            window.location.href = 'memory.html';
+        } else {
+            alert("لعبة " + gameName + " قريباً جداً! 🎮");
+        }
+    }
+</script>
+</body>
+  </html>
