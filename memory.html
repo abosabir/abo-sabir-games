@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة الذاكرة 🧠</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap');
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+        body {
+            background: radial-gradient(circle at top, #2d154a, #0d0416);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .menu-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 400px;
+            margin-top: 50px;
+            animation: fadeIn 0.5s;
+        }
+        .menu-title {
+            font-size: 34px;
+            font-weight: 900;
+            background: linear-gradient(to bottom, #fbbf24, #b45309);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 40px;
+            text-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+        }
+        .level-btn {
+            width: 100%;
+            padding: 18px;
+            margin-bottom: 15px;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 900;
+            font-family: 'Cairo', sans-serif;
+            cursor: pointer;
+            border: 2px solid;
+            box-shadow: 0 6px 0;
+            color: white;
+            transition: transform 0.1s;
+        }
+        .level-btn:active { transform: translateY(4px); box-shadow: 0 2px 0; }
+        .btn-easy { background: linear-gradient(to bottom, #22c55e, #15803d); border-color: #4ade80; box-shadow: 0 6px 0 #14532d; }
+        .btn-med { background: linear-gradient(to bottom, #f59e0b, #b45309); border-color: #fbbf24; box-shadow: 0 6px 0 #78350f; }
+        .btn-hard { background: linear-gradient(to bottom, #ef4444, #b91c1c); border-color: #fca5a5; box-shadow: 0 6px 0 #7f1d1d; }
+
+        .game-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 480px;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #3d1b63, #211033);
+            padding: 12px 15px;
+            border-radius: 15px;
+            border: 2px solid #a855f7;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+        }
+        
+        .score-box { font-size: 16px; font-weight: 900; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .score-box span { font-size: 22px; }
+        .score-player { color: #60a5fa; text-shadow: 0 0 10px rgba(96, 165, 250, 0.5); }
+        .score-bot { color: #ef4444; text-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
+        
+        .timers-container { display: flex; flex-direction: column; gap: 5px; font-size: 16px; font-weight: bold; }
+        .timer-player { color: #60a5fa; }
+        .timer-bot { color: #ef4444; }
+
+        .status { font-size: 18px; font-weight: bold; color: #e9d5ff; margin-bottom: 15px; min-height: 25px; text-align: center; }
+
+        .game-board { display: grid; gap: 8px; width: 100%; margin-bottom: 20px; justify-content: center; }
+
+        .grid-6 { grid-template-columns: repeat(3, 1fr); max-width: 300px; }
+        .grid-18 { grid-template-columns: repeat(4, 1fr); }
+        .grid-30 { grid-template-columns: repeat(5, 1fr); }
+
+        .card {
+            aspect-ratio: 1 / 1;
+            background: linear-gradient(145deg, #3d1b63, #211033);
+            border: 2px solid #7c3aed;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+            box-shadow: 0 5px 0 #1e0a3c;
+            position: relative;
+        }
+
+        .card.closed::after {
+            content: '❓';
+            font-size: 22px;
+            color: #c084fc;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(145deg, #4c1d95, #2e1065);
+            border-radius: 8px;
+            z-index: 2;
+        }
+
+        .card.opened::after { display: none; }
+        .card.opened { background: #150a24; border-color: #a855f7; transform: scale(1.05); box-shadow: 0 0 15px rgba(168, 85, 247, 0.5); }
+        
+        .card.matched-player { background: linear-gradient(145deg, #1d4ed8, #1e3a8a); border-color: #60a5fa; pointer-events: none; transform: scale(0.95); }
+        .card.matched-bot { background: linear-gradient(145deg, #b91c1c, #7f1d1d); border-color: #ef4444; pointer-events: none; transform: scale(0.95); }
+
+        .btn-restart {
+            background: linear-gradient(to bottom, #fbbf24, #d97706);
+            border: 2px solid #fff;
+            border-radius: 15px;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #000;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #92400e;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .btn-restart:active { transform: translateY(4px); box-shadow: 0 1px 0 #92400e; }
+
+        .btn-back {
+            background: linear-gradient(to bottom, #ef4444, #b91c1c);
+            border: 2px solid #fca5a5;
+            border-radius: 12px;
+            padding: 10px 20px;
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #7f1d1d;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .btn-back:active { transform: translateY(3px); box-shadow: 0 1px 0 #7f1d1d; }
+    </style>
+</head>
+<body>
+
+    <div class="menu-screen" id="menuScreen">
+        <div class="menu-title">لعبة الذاكرة 🧠</div>
+        <button class="level-btn btn-easy" onclick="startGame(6)">😎 سهل (6 كروت)</button>
+        <button class="level-btn btn-med" onclick="startGame(18)">😐 متوسط (18 كرت)</button>
+        <button class="level-btn btn-hard" onclick="startGame(30)">😈 صعب (30 كرت)</button>
+        <a href="index.html" class="btn-back" style="margin-top:30px;">🔙 العودة للرئيسية</a>
+    </div>
+
+    <div class="game-screen" id="gameScreen">
+        <div class="header-info">
+            <div class="score-box score-player">أنت<br><span id="playerScore">0</span></div>
+            
+            <div class="timers-container">
+                <div class="timer-player" id="playerTimer">⏱️ أنت: 00:00</div>
+                <div class="timer-bot" id="botTimer">🤖 الخصم: 00:00</div>
+            </div>
+
+            <div class="score-box score-bot">الخصم<br><span id="botScore">0</span></div>
+        </div>
+
+        <div class="status" id="statusText">دورك! اكتشف زوجين</div>
+
+        <div class="game-board" id="board"></div>
+
+        <button class="btn-restart" id="restartBtn" onclick="showMenu()">🔄 العب مرة أخرى</button>
+        <a href="index.html" class="btn-back">🔙 العودة للرئيسية</a>
+    </div>
+
+    <script>
+        const allEmojis = ['🐶', '🐱', '🦁', '🐼', '🦊', '🐸', '🐵', '🐷', '🐺', '🐻', '🦄', '🐍', '🐢', '🦋', '🐝'];
+
+        let deck = [];
+        let hasFlippedCard = false;
+        let lockBoard = false;
+        let firstCard, secondCard;
+        let playerScore = 0;
+        let botScore = 0;
+        let playerTurn = true;
+        let totalPairs = 0;
+        let matchedPairs = 0;
+        let botMemory = {}; 
+        
+        let playerTimeLeft = 0;
+        let botTimeLeft = 0;
+        let maxTime = 0;
+        let gameInterval = null;
+
+        const menuScreen = document.getElementById('menuScreen');
+        const gameScreen = document.getElementById('gameScreen');
+        const board = document.getElementById('board');
+        const statusText = document.getElementById('statusText');
+        const playerScoreEl = document.getElementById('playerScore');
+        const botScoreEl = document.getElementById('botScore');
+        const restartBtn = document.getElementById('restartBtn');
+        const playerTimerEl = document.getElementById('playerTimer');
+        const botTimerEl = document.getElementById('botTimer');
+
+        const botWinMessages = [
+            "ههههه! 😂 فرت عليك! ما عندك ذاكرة أبداً!",
+            "هل أنت متأكد أنك تحاول الفوز؟ 🤣",
+            "خسرت! 🏆 يبدو أنك تحتاج إلى مزيد من التدريب!"
+        ];
+        const playerWinMessages = [
+            "😡 حسناً حسناً.. لقد فزت! بس المرة الجاية سأسحقك!",
+            "أوه! 🥊 فوز بالحظ.. دور آخر وسأريك من أنا!",
+            "لا تفرح! 💢 هذه مجرد بداية، سأنتقم!"
+        ];
+
+        function showMenu() {
+            menuScreen.style.display = 'flex';
+            gameScreen.style.display = 'none';
+            restartBtn.style.display = 'none';
+            clearInterval(gameInterval);
+        }
+
+        function startGame(cardCount) {
+            menuScreen.style.display = 'none';
+            gameScreen.style.display = 'flex';
+            restartBtn.style.display = 'none';
+
+            if (cardCount === 6) maxTime = 60;
+            else if (cardCount === 18) maxTime = 120;
+            else maxTime = 180;
+
+            playerScore = 0;
+            botScore = 0;
+            playerTurn = true;
+            matchedPairs = 0;
+            botMemory = {};
+            hasFlippedCard = false;
+            lockBoard = false;
+            firstCard = null; secondCard = null;
+            
+            playerScoreEl.innerText = "0";
+            botScoreEl.innerText = "0";
+            board.innerHTML = '';
+
+            board.className = 'game-board';
+            if (cardCount === 6) board.classList.add('grid-6');
+            else if (cardCount === 18) board.classList.add('grid-18');
+            else board.classList.add('grid-30');
+
+            let pairsNeeded = cardCount / 2;
+            totalPairs = pairsNeeded;
+            let selectedEmojis = allEmojis.slice(0, pairsNeeded);
+            deck = [...selectedEmojis, ...selectedEmojis];
+            deck.sort(() => 0.5 - Math.random());
+
+            deck.forEach((emoji, index) => {
+                const card = document.createElement('div');
+                card.classList.add('card', 'closed');
+                card.dataset.emoji = emoji;
+                card.dataset.index = index;
+                card.innerText = emoji;
+                card.addEventListener('click', flipCard);
+                board.appendChild(card);
+            });
+
+            startPlayerTurn();
+        }
+
+        function startPlayerTurn() {
+            clearInterval(gameInterval);
+            playerTurn = true;
+            playerTimeLeft = maxTime; 
+            
+            statusText.innerText = "دورك! اكتشف زوجين 🎮";
+            statusText.style.color = "#fbbf24";
+            updateTimersDisplay();
+
+            gameInterval = setInterval(() => {
+                playerTimeLeft--;
+                updateTimersDisplay();
+
+                if (playerTimeLeft <= 0) {
+                    clearInterval(gameInterval);
+                    statusText.innerText = "انتهى وقتك! دور الخصم ⏱️";
+                    playerTurn = false;
+                    setTimeout(startBotTurn, 1000);
+                }
+            }, 1000);
+        }
+
+        function startBotTurn() {
+            clearInterval(gameInterval);
+            playerTurn = false;
+            botTimeLeft = maxTime;
+            
+            statusText.innerText = "الخصم يفكر... 🤖";
+            statusText.style.color = "#ef4444";
+            updateTimersDisplay();
+
+            gameInterval = setInterval(() => {
+                botTimeLeft--;
+                updateTimersDisplay();
+
+                if (botTimeLeft <= 0) {
+                    clearInterval(gameInterval);
+                    statusText.innerText = "انتهى وقت الخصم! دورك ⏱️";
+                    startPlayerTurn();
+                }
+            }, 1000);
+
+            botTurn();
+        }
+
+        function updateTimersDisplay() {
+            let pm = Math.floor(playerTimeLeft / 60);
+            let ps = playerTimeLeft % 60;
+            playerTimerEl.innerText = `⏱️ أنت: ${pm.toString().padStart(2, '0')}:${ps.toString().padStart(2, '0')}`;
+
+            let bm = Math.floor(botTimeLeft / 60);
+            let bs = botTimeLeft % 60;
+            botTimerEl.innerText = `🤖 الخصم: ${bm.toString().padStart(2, '0')}:${bs.toString().padStart(2, '0')}`;
+        }
+
+        function flipCard() {
+            if (!playerTurn || lockBoard) return;
+            if (this.classList.contains('matched-player') || this.classList.contains('matched-bot')) return;
+            if (this === firstCard) return;
+
+            this.classList.remove('closed');
+            this.classList.add('opened');
+            botMemory[this.dataset.index] = this.dataset.emoji;
+
+            if (!hasFlippedCard) {
+                hasFlippedCard = true;
+                firstCard = this;
+                return;
+            }
+
+            secondCard = this;
+            checkForMatch();
+        }
+
+        function checkForMatch() {
+            let isMatch = firstCard.dataset.emoji === secondCard.dataset.emoji;
+
+            if (isMatch) {
+                playerScore++;
+                playerScoreEl.innerText = playerScore;
+                matchedPairs++;
+                
+                firstCard.classList.add('matched-player');
+                secondCard.classList.add('matched-player');
+
+                delete botMemory[firstCard.dataset.index];
+                delete botMemory[secondCard.dataset.index];
+
+                resetBoard();
+
+                if (matchedPairs === totalPairs) {
+                    endGame();
+                } else {
+                    statusText.innerText = "أحسنت! دورك مرة أخرى 🎮";
+                }
+            } else {
+                lockBoard = true;
+                setTimeout(() => {
+                    firstCard.classList.remove('opened'); firstCard.classList.add('closed');
+                    secondCard.classList.remove('opened'); secondCard.classList.add('closed');
+                    resetBoard();
+                    
+                    playerTurn = false;
+                    startBotTurn(); 
+                }, 1200);
+            }
+        }
+
+        function botTurn() {
+            if (matchedPairs === totalPairs) return;
+            
+            lockBoard = true;
+            let card1 = null;
+            let card2 = null;
+
+            let useMemory = Math.random() < 0.6; 
+
+            let memoryKeys = Object.keys(botMemory);
+            let foundPair = false;
+
+            if (useMemory) {
+                for (let i = 0; i < memoryKeys.length; i++) {
+                    for (let j = i + 1; j < memoryKeys.length; j++) {
+                        if (botMemory[memoryKeys[i]] === botMemory[memoryKeys[j]]) {
+                            card1 = document.querySelector(`.card[data-index="${memoryKeys[i]}"]`);
+                            card2 = document.querySelector(`.card[data-index="${memoryKeys[j]}"]`);
+                            foundPair = true;
+                            break;
+                        }
+                    }
+                    if (foundPair) break;
+                }
+
+                if (!foundPair) {
+                    let closedCards = Array.from(document.querySelectorAll('.card.closed'));
+                    let memoryMatch = null;
+                    for (let key in botMemory) {
+                         let potentialMatch = closedCards.find(c => c.dataset.emoji === botMemory[key] && c.dataset.index !== key);
+                         if (potentialMatch) {
+                             memoryMatch = potentialMatch;
+                             card1 = document.querySelector(`.card[data-index="${key}"]`);
+                             card2 = potentialMatch;
+                             break;
+                         }
+                    }
+                }
+            }
+
+            if (!card1 || !card2) {
+                let closedCards = Array.from(document.querySelectorAll('.card.closed'));
+                card1 = closedCards[Math.floor(Math.random() * closedCards.length)];
+                let remainingCards = closedCards.filter(c => c !== card1);
+                card2 = remainingCards[Math.floor(Math.random() * remainingCards.length)];
+            }
+
+            card1.classList.remove('closed'); card1.classList.add('opened');
+            
+            setTimeout(() => {
+                card2.classList.remove('closed'); card2.classList.add('opened');
+                botMemory[card1.dataset.index] = card1.dataset.emoji;
+                botMemory[card2.dataset.index] = card2.dataset.emoji;
+
+                setTimeout(() => {
+                    if (card1.dataset.emoji === card2.dataset.emoji) {
+                        botScore++;
+                        botScoreEl.innerText = botScore;
+                        matchedPairs++;
+                        
+                        card1.classList.add('matched-bot');
+                        card2.classList.add('matched-bot');
+                        
+                        delete botMemory[card1.dataset.index];
+                        delete botMemory[card2.dataset.index];
+
+                        if (matchedPairs === totalPairs) {
+                            endGame();
+                        } else {
+                            statusText.innerText = "الخصم يلعب مرة أخرى... 🤖";
+                            setTimeout(botTurn, 1000);
+                        }
+                    } else {
+                        card1.classList.remove('opened'); card1.classList.add('closed');
+                        card2.classList.remove('opened'); card2.classList.add('closed');
+                        
+                        startPlayerTurn(); 
+                        lockBoard = false;
+                    }
+                }, 1000);
+            }, 600);
+        }
+
+        function resetBoard() {
+            [hasFlippedCard, lockBoard] = [false, false];
+            [firstCard, secondCard] = [null, null];
+        }
+
+        function endGame() {
+            lockBoard = true;
+            clearInterval(gameInterval);
+            restartBtn.style.display = 'block';
+            
+            if (playerScore > botScore) {
+                statusText.innerText = playerWinMessages[Math.floor(Math.random() * playerWinMessages.length)];
+                statusText.style.color = "#22c55e";
+            } else if (botScore > playerScore) {
+                statusText.innerText = botWinMessages[Math.floor(Math.random() * botWinMessages.length)];
+                statusText.style.color = "#ef4444";
+            } else {
+                statusText.innerText = "🤝 تعادل! لا فائز!";
+                statusText.style.color = "#fbbf24";
+            }
+        }
+    </script>
+</body>
+  </html>
