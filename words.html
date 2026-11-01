@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ترتيب الحروف 🧩</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap');
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+        body {
+            background: radial-gradient(circle at top, #2d154a, #0d0416);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 15px;
+        }
+
+        .top-bar {
+            width: 100%;
+            max-width: 450px;
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .btn-back {
+            background: linear-gradient(to bottom, #ef4444, #b91c1c);
+            border: 2px solid #fca5a5;
+            border-radius: 10px;
+            padding: 10px 15px;
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #7f1d1d;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-back:active { transform: translateY(3px); box-shadow: 0 1px 0 #7f1d1d; }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 450px;
+            background: rgba(0,0,0,0.4);
+            padding: 15px 25px;
+            border-radius: 15px;
+            border: 2px solid #581c87;
+            margin-bottom: 40px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        
+        .timer { font-size: 22px; font-weight: 900; color: #ef4444; text-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
+        .score { font-size: 20px; font-weight: 900; color: #22c55e; text-shadow: 0 0 10px rgba(34, 197, 94, 0.5); }
+
+        .word-card {
+            background: linear-gradient(145deg, #3d1b63, #211033);
+            border: 2px solid #a855f7;
+            border-radius: 20px;
+            padding: 40px 20px;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            margin-bottom: 30px;
+        }
+
+        .scrambled-word {
+            font-size: 36px;
+            font-weight: 900;
+            color: #fbbf24;
+            letter-spacing: 10px;
+            text-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+            word-wrap: break-word;
+        }
+
+        .input-area {
+            width: 100%;
+            max-width: 450px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #7c3aed;
+            background: #150a24;
+            color: white;
+            font-size: 22px;
+            font-family: 'Cairo', sans-serif;
+            text-align: center;
+            outline: none;
+            transition: 0.3s;
+        }
+        .answer-input:focus { border-color: #fbbf24; box-shadow: 0 0 15px rgba(251, 191, 36, 0.3); }
+
+        .submit-btn {
+            background: linear-gradient(to bottom, #22c55e, #15803d);
+            border: 2px solid #4ade80;
+            border-radius: 15px;
+            padding: 18px;
+            font-size: 22px;
+            font-weight: 900;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #14532d;
+            font-family: 'Cairo', sans-serif;
+        }
+        .submit-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #14532d; }
+
+        .result-msg {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            min-height: 60px;
+            margin-top: 15px;
+            line-height: 1.5;
+            padding: 0 10px;
+        }
+        .msg-correct { color: #22c55e; }
+        .msg-wrong { color: #ef4444; }
+
+        .next-btn {
+            background: linear-gradient(to bottom, #fbbf24, #d97706);
+            border: 2px solid #fff;
+            border-radius: 15px;
+            padding: 18px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #000;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #92400e;
+            width: 100%;
+            max-width: 450px;
+            display: none;
+            margin-top: 15px;
+        }
+        .next-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #92400e; }
+        
+        .give-up-btn {
+            background: transparent;
+            border: none;
+            color: #9ca3af;
+            font-size: 15px;
+            text-decoration: underline;
+            margin-top: 15px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <a href="index.html" class="btn-back">🔙 العودة للرئيسية</a>
+    </div>
+
+    <div class="stats-container">
+        <div class="timer" id="timerDisplay">02:00</div>
+        <div class="score" id="scoreDisplay">0 :النقاط</div>
+    </div>
+
+    <div class="word-card">
+        <div class="scrambled-word" id="scrambledWord">جاري التحميل...</div>
+    </div>
+
+    <div class="input-area" id="inputArea">
+        <input type="text" id="answerInput" class="answer-input" placeholder="اكتب الكلمة الصحيحة هنا..." autocomplete="off">
+        <button class="submit-btn" onclick="checkAnswer()">تحقق ✅</button>
+        <button class="give-up-btn" onclick="giveUp()">لا أعرف، أظهر الجواب 🙈</button>
+    </div>
+
+    <div class="result-msg" id="resultMsg"></div>
+
+    <button class="next-btn" id="nextBtn" onclick="nextWord()">السؤال التالي ➡️</button>
+
+    <script>
+        const words = [
+            "كتاب", "قلم", "مدرسه", "جامعه", "سياره", "طائره", "قطار", "سفينه", "دراجه", "شجره",
+            "زهره", "ماء", "نار", "هواء", "تراب", "شمس", "قمر", "نجم", "سماء", "أرض",
+            "بحر", "نهر", "جبل", "صحراء", "غابه", "مطر", "ثلج", "رياح", "عاصفه", "برق",
+            "رعد", "سحاب", "ضوء", "ظلام", "ليل", "نهار", "صباح", "مساء", "ساعه", "دقيقه",
+            "ثانيه", "يوم", "أسبوع", "شهر", "سنه", "قرن", "ماضي", "حاضر", "مستقبل", "حياه",
+            "موت", "صحه", "مرض", "دواء", "طبيب", "مستشفي", "مريض", "ألم", "سعاده", "حزن",
+            "خوف", "أمل", "حب", "كره", "صديق", "عدو", "أخ", "أخت", "أب", "أم",
+            "ابن", "ابنه", "جد", "جده", "عم", "خال", "عائله", "بيت", "غرفه", "مطبخ",
+            "حمام", "سرير", "كرسي", "طاوله", "باب", "نافذه", "سقف", "جدار", "مفتاح", "قفل",
+            "طعام", "خبز", "لحم", "دجاج", "سمك", "أرز", "مكرونه", "شوربه", "سلطه", "فاكهه",
+            "تفاح", "موز", "برتقال", "عنب", "فراوله", "بطيخ", "خيار", "طماطم", "بطاطس", "بصل",
+            "ثوم", "ملح", "سكر", "زيت", "عسل", "حليب", "جبن", "زبده", "بيض", "شاي",
+            "قهوه", "عصير", "ملابس", "قميص", "بنطال", "حذاء", "جاكيت", "قبعه", "نظاره", "محفظه",
+            "حقيبه", "هاتف", "حاسوب", "تلفاز", "راديو", "كاميرا", "مصباح", "مروحه", "مكيف", "ثلاجه",
+            "غساله", "فرن", "مكنسه", "مكواه", "مقص", "سكين", "ملعقه", "شوكه", "طبق", "كوب",
+            "زجاجه", "علبه", "صندوق", "حبل", "سلك", "مسمار", "مطرقه", "منشار", "مسطره", "ممحاه",
+            "دفتر", "ورقه", "شاحن", "بطاريه", "سماعه", "مكتب", "لوحه", "خريطه", "عالم", "دوله",
+            "مدينه", "قريه", "شارع", "طريق", "جسر", "نفق", "حديقه", "ملعب", "مسبح", "مكتبه",
+            "مسجد", "سوق", "متجر", "مطعم", "مقهي", "فندق", "مطار", "محطه", "ميناء", "بنك",
+            "شركه", "مصنع", "مزرعه", "حقل", "بستان", "نخله", "ورده", "عشب", "حجر", "رمل",
+            "حيوان", "أسد", "نمر", "فيل", "زرافه", "قرد", "دب", "ذئب", "ثعلب", "أرنب",
+            "حصان", "بقره", "خروف", "ماعز", "دجاجه", "بطه", "حمامه", "نسر", "صقر", "بوم",
+            "عصفور", "غراب", "طاووس", "نحله", "فراشه", "نمله", "عنكبوت", "عقرب", "ثعبان", "تمساح",
+            "سلحفاه", "ضفدع", "سمكه", "قرش", "دولفين", "حوت", "أخطبوط", "نجم البحر", "مرجان", "صدف",
+            "لؤلؤ", "ياقوت", "زمرد", "ألماس", "ذهب", "فضه", "نحاس", "حديد", "خشب", "زجاج",
+            "ورق", "قماش", "حرير", "صوف", "قطن", "جلد", "مطاط", "بلاستيك", "أسمنت", "طوب",
+            "بناء", "مهندس", "نجار", "حداد", "خباز", "جزار", "طباخ", "فلاح", "صياد", "سائق",
+            "طيار", "بحار", "جندي", "شرطي", "إطفائي", "محامي", "قاضي", "معلم", "تلميذ", "طالب",
+            "مبرمج", "مصمم", "كاتب", "شاعر", "رسام", "مغني", "ممثل", "مخرج", "صحفي", "مذيع",
+            "بطل", "خصم", "حكم", "جمهور", "ملعب", "كره", "مرمي", "شبكه", "حذاء رياضي", "قميص رياضي",
+            "ميداليه", "كأس", "تاج", "خاتم", "عقد", "سوار", "قرط", "مشبك", "مرآه", "مشط",
+            "فرشاه", "معجون", "صابون", "شامبو", "منشفه", "منظف", "معطر", "عطر", "مكياج", "أحمر شفاه",
+            "عيد", "ميلاد", "زفاف", "حفله", "هديه", "شمعه", "بالون", "كعكه", "حلوي", "شوكولاته",
+            "مثلجات", "بسكويت", "كوكيز", "دونات", "فطيره", "معجنات", "خبز محمص", "مربى", "عسل نحل", "زبده فول سوداني",
+            "مكسرات", "لوز", "جوز", "فستق", "كاجو", "بندق", "فول سوداني", "زبيب", "تمر", "تين",
+            "مشمش", "خوخ", "كرز", "رمان", "ليمون", "جريب فروت", "مانجو", "أناناس", "كيوي", "جوافه",
+            "باذنجان", "كوسا", "فلفل", "جزر", "ملفوف", "قرنبيط", "بروكلي", "سبانخ", "خس", "جرجير",
+            "بقدونس", "كزبره", "نعناع", "ريحان", "زعتر", "كمون", "فلفل أسود", "قرفه", "زنجبيل", "كركم",
+            "هيل", "قرنفل", "زعفران", "فانيليا", "خميره", "بيكنج بودر", "نشا", "دقيق", "سميد", "شوفان",
+            "عدس", "فول", "حمص", "فاصوليا", "لوبيا", "بازلاء", "ذره", "قمح", "شعير", "أرز بسمتي",
+            "برغل", "كسكس", "مكرونه بالصلصه", "بيتزا مارغريتا", "برجر لحم", "ساندوتش دجاج", "شاورما", "فلافل", "كباب", "كفته",
+            "محشي", "ملوخيه", "باميه", "مسقعه", "شكشوكه", "عجه", "فطائر", "منتو", "يخنه", "طاجن"
+        ];
+
+        let currentWord = "";
+        let score = 0;
+        let timerInterval = null;
+        let gameActive = false;
+        
+        const timeLimit = 120;
+        let timeLeft = timeLimit;
+
+        const scrambledWordEl = document.getElementById('scrambledWord');
+        const answerInput = document.getElementById('answerInput');
+        const resultMsg = document.getElementById('resultMsg');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const nextBtn = document.getElementById('nextBtn');
+        const inputArea = document.getElementById('inputArea');
+
+        function startGame() {
+            score = 0;
+            gameActive = true;
+            updateScore();
+            nextWord();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timeLeft = timeLimit;
+            updateTimerDisplay();
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    timeUp();
+                }
+            }, 1000);
+        }
+
+        function nextWord() {
+            if (!gameActive) return;
+
+            startTimer();
+            answerInput.value = "";
+            resultMsg.innerHTML = "";
+            nextBtn.style.display = 'none';
+            inputArea.style.display = 'flex';
+            answerInput.focus();
+
+            currentWord = words[Math.floor(Math.random() * words.length)];
+            
+            let letters = currentWord.split("");
+            let shuffled = [];
+            while (letters.length > 0) {
+                let index = Math.floor(Math.random() * letters.length);
+                shuffled.push(letters.splice(index, 1)[0]);
+            }
+            
+            scrambledWordEl.innerText = shuffled.join(" - ");
+        }
+
+        function normalizeText(text) {
+            return text
+                .trim()
+                .replace(/[أإآ]/g, 'ا')
+                .replace(/ة/g, 'ه')
+                .replace(/ي/g, 'ی')
+                .replace(/ك/g, 'ک')
+                .replace(/ؤ/g, 'و')
+                .replace(/ئ/g, 'ی')
+                .replace(/[\u064B-\u065F]/g, '')
+                .replace(/[^\u0600-\u06FF]/g, '');
+        }
+
+        function checkAnswer() {
+            if (!gameActive) return;
+
+            let userAnswer = answerInput.value.trim();
+            if (userAnswer === "") return;
+
+            clearInterval(timerInterval);
+
+            if (normalizeText(userAnswer) === normalizeText(currentWord)) {
+                score += 10;
+                updateScore();
+                resultMsg.innerHTML = `✅ إجابة صحيحة! +10`;
+                resultMsg.className = "result-msg msg-correct";
+                inputArea.style.display = 'none';
+                nextBtn.style.display = 'block';
+            } else {
+                showWrongAnswer();
+            }
+        }
+
+        function giveUp() {
+            if (!gameActive) return;
+            clearInterval(timerInterval);
+            showWrongAnswer();
+        }
+
+        function showWrongAnswer() {
+            resultMsg.innerHTML = `❌ إجابة خاطئة!<br>الجواب الصحيح هو: <b style="color:#fbbf24;">${currentWord}</b>`;
+            resultMsg.className = "result-msg msg-wrong";
+            inputArea.style.display = 'none';
+            nextBtn.style.display = 'block';
+        }
+
+        function timeUp() {
+            clearInterval(timerInterval);
+            resultMsg.innerHTML = `⏰ انتهى الوقت!<br>الجواب الصحيح هو: <b style="color:#fbbf24;">${currentWord}</b>`;
+            resultMsg.className = "result-msg msg-wrong";
+            inputArea.style.display = 'none';
+            nextBtn.style.display = 'block';
+        }
+
+        function updateScore() {
+            scoreDisplay.innerText = "النقاط: " + score;
+        }
+
+        function updateTimerDisplay() {
+            let minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
+            timerDisplay.innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        startGame();
+    </script>
+</body>
+  </html>
