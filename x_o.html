@@ -26,6 +26,31 @@
             margin-bottom: 5px;
             text-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
         }
+        /* استایل منوی انتخاب سطح */
+        .menu-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 20px;
+        }
+        .btn-menu {
+            background: linear-gradient(to bottom, #7c3aed, #4c1d95);
+            border: 2px solid #a855f7;
+            border-radius: 15px;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #2e1065;
+            transition: 0.2s;
+        }
+        .btn-menu:active { transform: translateY(4px); box-shadow: 0 1px 0 #2e1065; }
+        .btn-menu:hover { background: #6d28d9; }
+
+        /* باکس تایمر */
         .timer-box {
             font-size: 22px;
             font-weight: 900;
@@ -36,7 +61,7 @@
             border-radius: 20px;
             border: 2px solid #22c55e;
             transition: all 0.3s;
-            display: flex;
+            display: none; /* مخفی در منو */
             align-items: center;
             gap: 8px;
         }
@@ -57,9 +82,10 @@
             text-align: center;
             min-height: 30px;
             text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+            display: none;
         }
         .board {
-            display: grid;
+            display: none; /* مخفی در منو */
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
             background: rgba(0,0,0,0.3);
@@ -134,8 +160,16 @@
 <body>
 
     <div class="header-title">X O 🎮</div>
+    
+    <!-- منوی انتخاب سطح بازی -->
+    <div class="menu-container" id="mainMenu">
+        <button class="btn-menu" onclick="startGame('normal')">😊 وضع عادي (سهل)</button>
+        <button class="btn-menu" onclick="startGame('hard')">😈 وضع صعب (للمحترفين)</button>
+    </div>
+
+    <!-- بخش بازی (در ابتدا مخفی است) -->
     <div class="timer-box" id="timerBox">⏱️ <span id="timerText">15</span>s</div>
-    <div class="status" id="statusText">دورك! اختر مربعاً (أنت X)</div>
+    <div class="status" id="statusText"></div>
 
     <div class="board" id="board">
         <div class="cell" data-index="0"></div>
@@ -149,21 +183,27 @@
         <div class="cell" data-index="8"></div>
     </div>
 
-    <button class="btn-restart" id="restartBtn" onclick="startGame()">🔄 العب مرة أخرى</button>
+    <button class="btn-restart" id="restartBtn" onclick="restartGame()">🔄 العب مرة أخرى</button>
+    
     <a href="index.html" class="btn-back">🔙 العودة للرئيسية</a>
 
     <script>
+        // --- متغیرهای اصلی ---
         const statusText = document.getElementById('statusText');
         const cells = document.querySelectorAll('.cell');
         const restartBtn = document.getElementById('restartBtn');
         const timerText = document.getElementById('timerText');
         const timerBox = document.getElementById('timerBox');
+        const mainMenu = document.getElementById('mainMenu');
+        const board = document.getElementById('board');
         
         let boardState = ['', '', '', '', '', '', '', '', ''];
-        let gameActive = true;
+        let gameActive = false;
+        let currentDifficulty = 'normal'; // normal یا hard
         const HUMAN = 'X'; 
         const BOT = 'O';   
 
+        // --- متغیرهای تایمر ---
         let timeLeft = 15;
         let timerInterval = null;
         const MAX_TIME = 15;
@@ -190,7 +230,22 @@
             "لا فائز! 🎯 لكن المرة القادمة لن أرحمك!"
         ];
 
-        function startGame() {
+        // --- شروع بازی (با انتخاب سختی) ---
+        function startGame(difficulty) {
+            currentDifficulty = difficulty;
+            mainMenu.style.display = 'none';
+            board.style.display = 'grid';
+            timerBox.style.display = 'flex';
+            statusText.style.display = 'block';
+            
+            resetBoard();
+        }
+
+        function restartGame() {
+            resetBoard();
+        }
+
+        function resetBoard() {
             boardState = ['', '', '', '', '', '', '', '', ''];
             gameActive = true;
             statusText.innerText = "دورك! اختر مربعاً (أنت X)";
@@ -206,6 +261,7 @@
             resetTimer();
         }
 
+        // --- مدیریت تایمر ---
         function startTimer() {
             clearInterval(timerInterval);
             timeLeft = MAX_TIME;
@@ -250,6 +306,7 @@
             cells.forEach(cell => cell.onclick = null);
         }
 
+        // --- کلیک روی خانه‌ها ---
         function handleCellClick(cell) {
             const index = parseInt(cell.getAttribute('data-index'));
             if (!gameActive || boardState[index] !== '') return;
@@ -268,10 +325,15 @@
             setTimeout(botMove, 600);
         }
 
+        // --- حرکت ربات ---
         function botMove() {
             let moveIndex = -1;
             
-            if (Math.random() < 0.7) {
+            // اگر حالت سخت باشد، همیشه از هوش مصنوعی استفاده می‌کند
+            // اگر حالت عادی باشد، ۷۰٪ هوشمند و ۳۰٪ شانسی بازی می‌کند
+            let useAI = (currentDifficulty === 'hard') || (Math.random() < 0.7);
+
+            if (useAI) {
                 let bestScore = -Infinity;
                 for (let i = 0; i < boardState.length; i++) {
                     if (boardState[i] === '') {
@@ -303,6 +365,7 @@
             startTimer();
         }
 
+        // --- هوش مصنوعی (Minimax) ---
         function minimax(board, depth, isMaximizing) {
             let result = checkWinnerForMinimax(board);
             if (result !== null) {
@@ -347,6 +410,7 @@
             return null;
         }
 
+        // --- بررسی نتیجه ---
         function checkResult() {
             let roundWon = false;
             let winCombo = null;
@@ -389,8 +453,6 @@
 
             return false;
         }
-
-        startGame();
     </script>
 </body>
 </html>
