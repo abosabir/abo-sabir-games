@@ -2,117 +2,153 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>لعبة X O 🎮</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap');
-        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+        
+        * { 
+            box-sizing: border-box; 
+            font-family: 'Cairo', sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        
         body {
-            background: radial-gradient(circle at top, #2d154a, #0d0416);
+            background: radial-gradient(circle at 50% 0%, #3b0764, #0d0416 70%);
             color: white;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             min-height: 100vh;
             padding: 20px 15px;
+            /* جلوگیری از اسکرول افقی */
+            overflow-x: hidden; 
         }
+
+        /* بخش بالا */
+        .top-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
         .header-title {
             font-size: 36px;
             font-weight: 900;
             background: linear-gradient(to bottom, #fbbf24, #b45309);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 5px;
-            text-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            animation: float 3s ease-in-out infinite;
         }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .status-container {
+            min-height: 50px; /* ارتفاع حداقل برای جلوگیری از پریدن */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .status {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fbbf24;
+            text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+            text-align: center;
+            padding: 0 10px;
+            line-height: 1.4;
+        }
+
+        /* منوی اصلی */
         .menu-container {
             display: flex;
             flex-direction: column;
             gap: 15px;
             width: 100%;
-            max-width: 300px;
-            margin-bottom: 20px;
+            max-width: 320px;
+            margin-top: 20px;
         }
+
         .btn-menu {
-            background: linear-gradient(to bottom, #7c3aed, #4c1d95);
-            border: 2px solid #a855f7;
-            border-radius: 15px;
-            padding: 15px;
-            font-size: 18px;
-            font-weight: bold;
+            width: 100%;
+            border-radius: 18px;
+            padding: 15px 20px;
+            font-size: 20px;
+            font-weight: 900;
             color: white;
             cursor: pointer;
-            box-shadow: 0 5px 0 #2e1065;
-            transition: 0.2s;
-        }
-        .btn-menu:active { transform: translateY(4px); box-shadow: 0 1px 0 #2e1065; }
-        .btn-menu:hover { background: #6d28d9; }
-
-        .timer-box {
-            font-size: 22px;
-            font-weight: 900;
-            color: #22c55e;
-            margin-bottom: 15px;
-            background: rgba(0,0,0,0.4);
-            padding: 5px 20px;
-            border-radius: 20px;
-            border: 2px solid #22c55e;
-            transition: all 0.3s;
-            display: none;
+            border: none;
+            display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: space-between;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.4), inset 0 2px 0 rgba(255,255,255,0.2);
+            transition: transform 0.1s;
         }
-        .timer-box.warning {
-            color: #ef4444;
-            border-color: #ef4444;
-            animation: pulseTimer 0.5s infinite alternate;
-        }
-        @keyframes pulseTimer {
-            from { transform: scale(1); }
-            to { transform: scale(1.1); }
-        }
-        .status {
-            font-size: 20px;
-            font-weight: bold;
-            color: #fbbf24;
-            margin-bottom: 20px;
-            text-align: center;
-            min-height: 30px;
-            text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+        .btn-menu:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.4); }
+
+        .btn-easy { background: linear-gradient(135deg, #10b981, #047857); border: 2px solid #34d399; }
+        .btn-medium { background: linear-gradient(135deg, #f59e0b, #b45309); border: 2px solid #fbbf24; }
+        .btn-hard { background: linear-gradient(135deg, #ef4444, #991b1b); border: 2px solid #f87171; }
+
+        /* محیط بازی */
+        .game-area {
             display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            height: 100%;
         }
+
+        /* صفحه بازی - جادوی اصلی اینجاست */
         .board {
-            display: none;
+            display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
-            background: rgba(0,0,0,0.3);
-            padding: 15px;
+            background: rgba(0,0,0,0.4);
+            padding: 12px;
             border-radius: 20px;
-            border: 2px solid #581c87;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            border: 2px solid #7c3aed;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6), inset 0 0 15px rgba(124, 58, 237, 0.3);
+            
+            width: 100%;
+            max-width: 320px; /* حداکثر عرض */
+            aspect-ratio: 1 / 1; /* کل صفحه بازی همیشه مربع می‌مونه */
+            
             margin-bottom: 30px;
         }
+
         .cell {
-            width: 90px;
-            height: 90px;
+            width: 100%;
+            height: 100%;
             background: linear-gradient(145deg, #3d1b63, #211033);
-            border: 2px solid #7c3aed;
-            border-radius: 15px;
+            border: 2px solid #6d28d9;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 50px;
             font-weight: 900;
             cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 5px 0 #1e0a3c;
+            box-shadow: 0 4px 0 #1e0a3c;
             user-select: none;
+            aspect-ratio: 1 / 1; /* هر خونه هم دقیقا مربع */
         }
-        .cell:hover { background: #4c1d95; border-color: #a855f7; }
-        .cell:active { transform: translateY(4px); box-shadow: 0 1px 0 #1e0a3c; }
+
         .cell.x { color: #60a5fa; text-shadow: 0 0 15px #3b82f6; }
         .cell.o { color: #ef4444; text-shadow: 0 0 15px #ef4444; }
+        
         .cell.win {
             background: linear-gradient(145deg, #15803d, #064e3b);
             border-color: #22c55e;
@@ -120,88 +156,110 @@
         }
         @keyframes pulseWin {
             from { transform: scale(1); box-shadow: 0 0 10px #22c55e; }
-            to { transform: scale(1.05); box-shadow: 0 0 25px #22c55e; }
+            to { transform: scale(1.05); box-shadow: 0 0 20px #22c55e; }
         }
+
+        /* دکمه‌های پایین */
+        .bottom-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+            width: 100%;
+            max-width: 320px;
+            min-height: 120px; /* جلوگیری از پریدن صفحه وقتی دکمه ظاهر میشه */
+        }
+
         .btn-restart {
             background: linear-gradient(to bottom, #fbbf24, #d97706);
             border: 2px solid #fff;
             border-radius: 15px;
-            padding: 15px 40px;
-            font-size: 20px;
-            font-weight: bold;
+            padding: 12px;
+            font-size: 18px;
+            font-weight: 900;
             color: #000;
             cursor: pointer;
             box-shadow: 0 5px 0 #92400e;
             width: 100%;
-            max-width: 300px;
-            margin-bottom: 20px;
             display: none;
         }
-        .btn-restart:active { transform: translateY(4px); box-shadow: 0 1px 0 #92400e; }
+        .btn-restart:active { transform: translateY(3px); box-shadow: 0 2px 0 #92400e; }
+        
         .btn-back {
-            background: linear-gradient(to bottom, #ef4444, #b91c1c);
-            border: 2px solid #fca5a5;
-            border-radius: 10px;
+            background: linear-gradient(to bottom, #334155, #1e293b);
+            border: 2px solid #64748b;
+            border-radius: 12px;
             padding: 10px 20px;
             color: white;
             text-decoration: none;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: bold;
-            box-shadow: 0 4px 0 #7f1d1d;
+            box-shadow: 0 4px 0 #0f172a;
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        .btn-back:active { transform: translateY(3px); box-shadow: 0 1px 0 #7f1d1d; }
+        .btn-back:active { transform: translateY(3px); box-shadow: 0 1px 0 #0f172a; }
     </style>
 </head>
 <body>
 
-    <div class="header-title">X O 🎮</div>
+    <!-- بخش بالا -->
+    <div class="top-section">
+        <div class="header-title">🕹️ X O</div>
+        <div class="status-container">
+            <div class="status" id="statusText"></div>
+        </div>
+    </div>
     
+    <!-- منوی اصلی -->
     <div class="menu-container" id="mainMenu">
-        <button class="btn-menu" onclick="startGame('easy')">مبتدئ</button>
-        <button class="btn-menu" onclick="startGame('medium')">محترف</button>
-        <button class="btn-menu" onclick="startGame('hard')">أسطورة</button>
+        <button class="btn-menu btn-easy" onclick="startGame('easy')">
+            <span>مبتدئ</span><span>🌱</span>
+        </button>
+        <button class="btn-menu btn-medium" onclick="startGame('medium')">
+            <span>محترف</span><span>🔥</span>
+        </button>
+        <button class="btn-menu btn-hard" onclick="startGame('hard')">
+            <span>أسطورة</span><span>👑</span>
+        </button>
     </div>
 
-    <div class="timer-box" id="timerBox">⏱️ <span id="timerText">15</span>s</div>
-    <div class="status" id="statusText"></div>
+    <!-- محیط بازی -->
+    <div class="game-area" id="gameArea">
+        
+        <!-- صفحه بازی -->
+        <div class="board" id="board">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
 
-    <div class="board" id="board">
-        <div class="cell" data-index="0"></div>
-        <div class="cell" data-index="1"></div>
-        <div class="cell" data-index="2"></div>
-        <div class="cell" data-index="3"></div>
-        <div class="cell" data-index="4"></div>
-        <div class="cell" data-index="5"></div>
-        <div class="cell" data-index="6"></div>
-        <div class="cell" data-index="7"></div>
-        <div class="cell" data-index="8"></div>
+        <!-- دکمه‌های پایین -->
+        <div class="bottom-actions">
+            <button class="btn-restart" id="restartBtn" onclick="restartGame()">تحدي مجدد 🔥</button>
+            <a href="index.html" class="btn-back">🔙 العودة للرئيسية</a>
+        </div>
     </div>
-
-    <button class="btn-restart" id="restartBtn" onclick="restartGame()">🔄 العب مرة أخرى</button>
-    
-    <a href="index.html" class="btn-back">🔙 العودة للرئيسية</a>
 
     <script>
         const statusText = document.getElementById('statusText');
         const cells = document.querySelectorAll('.cell');
         const restartBtn = document.getElementById('restartBtn');
-        const timerText = document.getElementById('timerText');
-        const timerBox = document.getElementById('timerBox');
         const mainMenu = document.getElementById('mainMenu');
-        const board = document.getElementById('board');
+        const gameArea = document.getElementById('gameArea');
         
         let boardState = ['', '', '', '', '', '', '', '', ''];
         let gameActive = false;
-        let currentDifficulty = 'easy'; // Default to first button
+        let currentDifficulty = 'easy';
         const HUMAN = 'X'; 
         const BOT = 'O';   
-
-        let timeLeft = 15;
-        let timerInterval = null;
-        const MAX_TIME = 15;
 
         const winConditions = [
             [0, 1, 2], [3, 4, 5], [6, 7, 8], 
@@ -210,27 +268,32 @@
         ];
 
         const botWinMessages = [
-            "ههههه! فرت عليك! 😂 تلعب مثل الأطفال!",
-            "الكمبيوتر دائماً يفوز! 😎 لا تحاول مجدداً!",
-            "خسرت! 🏆 أنا الأسطورة الحقيقية هنا!"
+            "ههههه! هذا هو حقي! أنا الأفضل! 😎",
+            "الحق معي دائماً! لا تحاول مجدداً! 🏆",
+            "ألم أقل لك؟ أنا الأسطورة الحقيقية هنا! 👑",
+            "حق عليك! تعلم اللعب أولاً ثم تحداني! 😂",
+            "النصر حليفي! أنت مجرد مبتدئ! 🔥"
         ];
+
         const humanWinMessages = [
-            "😡 حسناً حسناً.. لقد فزت! بس المرة الجاية سأسحقك!",
-            "أوه! 🥊 ضربة حظ.. دور آخر وسأريك من أنا!",
-            "لا تفرح! 💢 هذه مجرد بداية، سأنتقم!"
+            "ههههه! هل فزت؟! لا أصدق! أنت تغش! 🤣",
+            "ضربة حظ! 😂 لن تفوز مرة أخرى أبداً!",
+            "هههههه! حتى الطفل يلعب أفضل منك! 🍼",
+            "فزت؟! مستحيل! أنا كنت ألعب بيد واحدة! 😆",
+            "لا تفرح! هذه مجرد صدفة! سأسحقك المرة القادمة! 🤬"
         ];
+
         const drawMessages = [
-            "🤝 تعادل! لكنني سأفوز في المرة القادمة!",
-            "تعادل.. 🤨 أنت أفضل مما توقعت!",
-            "لا فائز! 🎯 لكن المرة القادمة لن أرحمك!"
+            "تعادل؟! مستحيل! أنا متأكد أنني أستطيع هزيمتك! تعال مرة أخرى! 💢",
+            "هذه مجرد بداية! أنا أحميك الآن، المرة القادمة سأسحقك! 😈",
+            "تعادل يعني أنك محظوظ! لكن الحظ لن يدوم! هيا مجدداً! 😤",
+            "لا لا لا! هذا ليس فوزاً! أنا أستطيع هزيمتك بسهولة! أعد المحاولة! 🔥"
         ];
 
         function startGame(difficulty) {
             currentDifficulty = difficulty;
             mainMenu.style.display = 'none';
-            board.style.display = 'grid';
-            timerBox.style.display = 'flex';
-            statusText.style.display = 'block';
+            gameArea.style.display = 'flex';
             resetBoard();
         }
 
@@ -241,8 +304,10 @@
         function resetBoard() {
             boardState = ['', '', '', '', '', '', '', '', ''];
             gameActive = true;
-            statusText.innerText = "دورك! اختر مربعاً (أنت X)";
+            
+            statusText.innerText = "دورك! (X)";
             statusText.style.color = "#fbbf24";
+            
             restartBtn.style.display = 'none';
             
             cells.forEach(cell => {
@@ -250,58 +315,12 @@
                 cell.className = 'cell'; 
                 cell.onclick = () => handleCellClick(cell);
             });
-            resetTimer();
-        }
-
-        function startTimer() {
-            clearInterval(timerInterval);
-            timeLeft = MAX_TIME;
-            updateTimerUI();
-            
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                updateTimerUI();
-                
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    timeOut();
-                }
-            }, 1000);
-        }
-
-        function stopTimer() {
-            clearInterval(timerInterval);
-        }
-
-        function resetTimer() {
-            stopTimer();
-            timeLeft = MAX_TIME;
-            updateTimerUI();
-            startTimer();
-        }
-
-        function updateTimerUI() {
-            timerText.innerText = timeLeft;
-            if (timeLeft <= 5) {
-                timerBox.classList.add('warning');
-            } else {
-                timerBox.classList.remove('warning');
-            }
-        }
-
-        function timeOut() {
-            gameActive = false;
-            statusText.innerText = "⏰ انتهى وقتك! خسرت! الكمبيوتر يفوز!";
-            statusText.style.color = "#ef4444";
-            restartBtn.style.display = 'block';
-            cells.forEach(cell => cell.onclick = null);
         }
 
         function handleCellClick(cell) {
             const index = parseInt(cell.getAttribute('data-index'));
             if (!gameActive || boardState[index] !== '') return;
 
-            stopTimer();
             boardState[index] = HUMAN;
             cell.innerText = HUMAN;
             cell.classList.add('x');
@@ -309,24 +328,19 @@
             if (checkResult()) return;
 
             gameActive = false;
-            statusText.innerText = "الكمبيوتر يفكر... 🤖";
-            statusText.style.color = "#ef4444";
-            
-            setTimeout(botMove, 600);
+            setTimeout(botMove, 200); 
         }
 
         function botMove() {
             let moveIndex = -1;
             
-            // تعیین احتمال استفاده از بهترین حرکت بر اساس سطح
-            let aiChance = 0.6; // مبتدئ
-            if (currentDifficulty === 'medium') aiChance = 0.8; // محترف
-            if (currentDifficulty === 'hard') aiChance = 0.9; // أسطورة
+            let aiChance = 0.6;
+            if (currentDifficulty === 'medium') aiChance = 0.8;
+            if (currentDifficulty === 'hard') aiChance = 0.9;
             
             let useAI = Math.random() < aiChance;
 
             if (useAI) {
-                // پیدا کردن بهترین حرکت با Minimax
                 let bestScore = -Infinity;
                 for (let i = 0; i < boardState.length; i++) {
                     if (boardState[i] === '') {
@@ -340,7 +354,6 @@
                     }
                 }
             } else {
-                // حرکت تصادفی
                 let emptyCells = [];
                 boardState.forEach((val, i) => { if (val === '') emptyCells.push(i); });
                 moveIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
@@ -354,9 +367,6 @@
             if (checkResult()) return;
 
             gameActive = true;
-            statusText.innerText = "دورك! اختر مربعاً (أنت X)";
-            statusText.style.color = "#fbbf24";
-            startTimer();
         }
 
         function minimax(board, depth, isMaximizing) {
@@ -418,7 +428,6 @@
 
             if (roundWon) {
                 gameActive = false;
-                stopTimer();
                 winCombo.forEach(idx => {
                     document.querySelector(`.cell[data-index="${idx}"]`).classList.add('win');
                 });
@@ -436,7 +445,6 @@
 
             if (!boardState.includes('')) {
                 gameActive = false;
-                stopTimer();
                 statusText.innerText = drawMessages[Math.floor(Math.random() * drawMessages.length)];
                 statusText.style.color = "#fbbf24";
                 restartBtn.style.display = 'block';
