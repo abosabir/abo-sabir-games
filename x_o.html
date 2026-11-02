@@ -17,7 +17,6 @@
             min-height: 100vh;
             padding: 20px 15px;
         }
-
         .header-title {
             font-size: 36px;
             font-weight: 900;
@@ -27,12 +26,10 @@
             margin-bottom: 5px;
             text-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
         }
-
-        /* --- استایل تایمر --- */
         .timer-box {
             font-size: 22px;
             font-weight: 900;
-            color: #22c55e; /* سبز */
+            color: #22c55e;
             margin-bottom: 15px;
             background: rgba(0,0,0,0.4);
             padding: 5px 20px;
@@ -44,7 +41,7 @@
             gap: 8px;
         }
         .timer-box.warning {
-            color: #ef4444; /* قرمز */
+            color: #ef4444;
             border-color: #ef4444;
             animation: pulseTimer 0.5s infinite alternate;
         }
@@ -52,7 +49,6 @@
             from { transform: scale(1); }
             to { transform: scale(1.1); }
         }
-
         .status {
             font-size: 20px;
             font-weight: bold;
@@ -62,7 +58,6 @@
             min-height: 30px;
             text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
         }
-
         .board {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -74,7 +69,6 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.6);
             margin-bottom: 30px;
         }
-
         .cell {
             width: 90px;
             height: 90px;
@@ -91,13 +85,10 @@
             box-shadow: 0 5px 0 #1e0a3c;
             user-select: none;
         }
-        
         .cell:hover { background: #4c1d95; border-color: #a855f7; }
         .cell:active { transform: translateY(4px); box-shadow: 0 1px 0 #1e0a3c; }
-
         .cell.x { color: #60a5fa; text-shadow: 0 0 15px #3b82f6; }
         .cell.o { color: #ef4444; text-shadow: 0 0 15px #ef4444; }
-
         .cell.win {
             background: linear-gradient(145deg, #15803d, #064e3b);
             border-color: #22c55e;
@@ -107,7 +98,6 @@
             from { transform: scale(1); box-shadow: 0 0 10px #22c55e; }
             to { transform: scale(1.05); box-shadow: 0 0 25px #22c55e; }
         }
-
         .btn-restart {
             background: linear-gradient(to bottom, #fbbf24, #d97706);
             border: 2px solid #fff;
@@ -124,7 +114,6 @@
             display: none;
         }
         .btn-restart:active { transform: translateY(4px); box-shadow: 0 1px 0 #92400e; }
-
         .btn-back {
             background: linear-gradient(to bottom, #ef4444, #b91c1c);
             border: 2px solid #fca5a5;
@@ -145,10 +134,7 @@
 <body>
 
     <div class="header-title">X O 🎮</div>
-    
-    <!-- باکس تایمر -->
     <div class="timer-box" id="timerBox">⏱️ <span id="timerText">15</span>s</div>
-
     <div class="status" id="statusText">دورك! اختر مربعاً (أنت X)</div>
 
     <div class="board" id="board">
@@ -164,7 +150,6 @@
     </div>
 
     <button class="btn-restart" id="restartBtn" onclick="startGame()">🔄 العب مرة أخرى</button>
-    
     <a href="index.html" class="btn-back">🔙 العودة للرئيسية</a>
 
     <script>
@@ -179,7 +164,6 @@
         const HUMAN = 'X'; 
         const BOT = 'O';   
 
-        // --- متغیرهای تایمر ---
         let timeLeft = 15;
         let timerInterval = null;
         const MAX_TIME = 15;
@@ -219,12 +203,11 @@
                 cell.onclick = () => handleCellClick(cell);
             });
 
-            resetTimer(); // استارت تایمر برای شروع بازی
+            resetTimer();
         }
 
-        // --- توابع مدیریت تایمر ---
         function startTimer() {
-            clearInterval(timerInterval); // پاک کردن تایمر قبلی
+            clearInterval(timerInterval);
             timeLeft = MAX_TIME;
             updateTimerUI();
             
@@ -264,20 +247,14 @@
             statusText.innerText = "⏰ انتهى وقتك! خسرت! الكمبيوتر يفوز!";
             statusText.style.color = "#ef4444";
             restartBtn.style.display = 'block';
-            
-            // بستن کلیک‌ها
             cells.forEach(cell => cell.onclick = null);
         }
 
-        // --- توابع بازی ---
         function handleCellClick(cell) {
             const index = parseInt(cell.getAttribute('data-index'));
-            
             if (!gameActive || boardState[index] !== '') return;
 
-            // کاربر حرکت کرد، تایمر متوقف میشه
             stopTimer();
-
             boardState[index] = HUMAN;
             cell.innerText = HUMAN;
             cell.classList.add('x');
@@ -323,8 +300,6 @@
             gameActive = true;
             statusText.innerText = "دورك! اختر مربعاً (أنت X)";
             statusText.style.color = "#fbbf24";
-            
-            // نوبت دوباره به کاربر رسید، تایمر شروع میشه
             startTimer();
         }
 
@@ -387,7 +362,7 @@
 
             if (roundWon) {
                 gameActive = false;
-                stopTimer(); // توقف تایمر هنگام برد
+                stopTimer();
                 winCombo.forEach(idx => {
                     document.querySelector(`.cell[data-index="${idx}"]`).classList.add('win');
                 });
@@ -405,7 +380,7 @@
 
             if (!boardState.includes('')) {
                 gameActive = false;
-                stopTimer(); // توقف تایمر هنگام مساوی
+                stopTimer();
                 statusText.innerText = drawMessages[Math.floor(Math.random() * drawMessages.length)];
                 statusText.style.color = "#fbbf24";
                 restartBtn.style.display = 'block';
@@ -418,508 +393,4 @@
         startGame();
     </script>
 </body>
-</html>', '', '', '', '', '', '', ''];
-            gameActive = true;
-            currentPlayer = 'X';
-            restartBtn.style.display = 'none';
-            
-            cells.forEach(cell => {
-                cell.innerText = '';
-                cell.className = 'cell'; 
-            });
-
-            if (currentMode === 'bot') {
-                statusText.innerText = "دورك! اختر مربعاً (أنت X)";
-                statusText.style.color = "#fbbf24";
-            } else if (currentMode === 'local') {
-                statusText.innerText = "دور اللاعب X";
-                statusText.style.color = "#60a5fa";
-            } else if (currentMode === 'online') {
-                if (mySymbol === 'X') statusText.innerText = "أنت X - دورك";
-                else statusText.innerText = "أنت O - انتظر دورك";
-            }
-        }
-
-        function handleCellClick(cell) {
-            const index = parseInt(cell.getAttribute('data-index'));
-            if (!gameActive || boardState[index] !== '') return;
-
-            if (currentMode === 'bot') {
-                if (currentPlayer !== 'X') return;
-                boardState[index] = 'X';
-                cell.innerText = 'X';
-                cell.classList.add('x');
-                if (checkResult('X', index)) return;
-                gameActive = false;
-                statusText.innerText = "الكمبيوتر يفكر... 🤖";
-                statusText.style.color = "#ef4444";
-                setTimeout(botMove, 600);
-
-            } else if (currentMode === 'local') {
-                boardState[index] = currentPlayer;
-                cell.innerText = currentPlayer;
-                cell.classList.add(currentPlayer.toLowerCase());
-                if (checkResult(currentPlayer, index)) return;
-                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                statusText.innerText = `دور اللاعب ${currentPlayer}`;
-                statusText.style.color = currentPlayer === 'X' ? "#60a5fa" : "#ef4444";
-
-            } else if (currentMode === 'online') {
-                if (currentPlayer !== mySymbol || !conn || !conn.open) return;
-                boardState[index] = mySymbol;
-                cell.innerText = mySymbol;
-                cell.classList.add(mySymbol.toLowerCase());
-                conn.send({ type: 'move', index: index, player: mySymbol });
-                if (checkResult(mySymbol, index)) return;
-                currentPlayer = mySymbol === 'X' ? 'O' : 'X';
-                statusText.innerText = "انتظر دور الخصم...";
-                statusText.style.color = "#fbbf24";
-            }
-        }
-
-        function botMove() {
-            let moveIndex = -1;
-            if (Math.random() < 0.7) {
-                let bestScore = -Infinity;
-                for (let i = 0; i < boardState.length; i++) {
-                    if (boardState[i] === '') {
-                        boardState[i] = 'O';
-                        let score = minimax(boardState, 0, false);
-                        boardState[i] = '';
-                        if (score > bestScore) {
-                            bestScore = score;
-                            moveIndex = i;
-                        }
-                    }
-                }
-            } else {
-                let emptyCells = [];
-                boardState.forEach((val, i) => { if (val === '') emptyCells.push(i); });
-                moveIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-            }
-            boardState[moveIndex] = 'O';
-            let botCell = document.querySelector(`.cell[data-index="${moveIndex}"]`);
-            botCell.innerText = 'O';
-            botCell.classList.add('o');
-            if (checkResult('O', moveIndex)) return;
-            gameActive = true;
-            statusText.innerText = "دورك! اختر مربعاً (أنت X)";
-            statusText.style.color = "#fbbf24";
-        }
-
-        function minimax(board, depth, isMaximizing) {
-            let result = checkWinnerForMinimax(board);
-            if (result !== null) {
-                if (result === 'O') return 10 - depth;
-                if (result === 'X') return depth - 10;
-                if (result === 'draw') return 0;
-            }
-            if (isMaximizing) {
-                let bestScore = -Infinity;
-                for (let i = 0; i < board.length; i++) {
-                    if (board[i] === '') {
-                        board[i] = 'O';
-                        let score = minimax(board, depth + 1, false);
-                        board[i] = '';
-                        bestScore = Math.max(score, bestScore);
-                    }
-                }
-                return bestScore;
-            } else {
-                let bestScore = Infinity;
-                for (let i = 0; i < board.length; i++) {
-                    if (board[i] === '') {
-                        board[i] = 'X';
-                        let score = minimax(board, depth + 1, true);
-                        board[i] = '';
-                        bestScore = Math.min(score, bestScore);
-                    }
-                }
-                return bestScore;
-            }
-        }
-
-        function checkWinnerForMinimax(board) {
-            for (let i = 0; i < winConditions.length; i++) {
-                let [a, b, c] = winConditions[i];
-                if (board[a] && board[a] === board[b] && board[a] === board[c]) return board[a];
-            }
-            if (!board.includes('')) return 'draw';
-            return null;
-        }
-
-        function checkResult(player, lastIndex) {
-            let roundWon = false;
-            let winCombo = null;
-            for (let i = 0; i < winConditions.length; i++) {
-                let [a, b, c] = winConditions[i];
-                if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
-                    roundWon = true;
-                    winCombo = [a, b, c];
-                    break;
-                }
-            }
-            if (roundWon) {
-                gameActive = false;
-                winCombo.forEach(idx => { document.querySelector(`.cell[data-index="${idx}"]`).classList.add('win'); });
-                if (currentMode === 'bot') {
-                    if (player === 'X') {
-                        statusText.innerText = humanWinMessages[Math.floor(Math.random() * humanWinMessages.length)];
-                        statusText.style.color = "#22c55e";
-                    } else {
-                        statusText.innerText = botWinMessages[Math.floor(Math.random() * botWinMessages.length)];
-                        statusText.style.color = "#ef4444";
-                    }
-                } else {
-                    statusText.innerText = `اللاعب ${player} فاز! 🎉`;
-                    statusText.style.color = "#22c55e";
-                }
-                restartBtn.style.display = 'block';
-                return true;
-            }
-            if (!boardState.includes('')) {
-                gameActive = false;
-                statusText.innerText = drawMessages[Math.floor(Math.random() * drawMessages.length)];
-                statusText.style.color = "#fbbf24";
-                restartBtn.style.display = 'block';
-                return true;
-            }
-            return false;
-        }
-
-        function createRoom() {
-            roomId = "XO-" + Math.floor(1000 + Math.random() * 9000).toString();
-            mySymbol = 'X';
-            roomInfo.innerHTML = `كود الغرفة: <b style="color:#4ecdc4; font-size:1.2rem;">${roomId}</b><br>انتظر الخصم...`;
-            peer = new Peer(roomId);
-            peer.on('open', (id) => {
-                currentMode = 'online';
-                isOnline = true;
-                onlineMenu.style.display = 'none';
-                boardDiv.style.display = 'grid';
-                resetBoard();
-            });
-            peer.on('connection', (connection) => {
-                conn = connection;
-                setupConnection();
-            });
-        }
-
-        function joinRoom() {
-            const code = document.getElementById('roomCodeInput').value.trim();
-            if (!code) return alert("أدخل كود الغرفة");
-            roomId = code;
-            mySymbol = 'O';
-            peer = new Peer();
-            peer.on('open', () => {
-                conn = peer.connect(roomId);
-                setupConnection();
-                currentMode = 'online';
-                isOnline = true;
-                onlineMenu.style.display = 'none';
-                boardDiv.style.display = 'grid';
-                resetBoard();
-            });
-            peer.on('error', (err) => {
-                alert("خطأ في الاتصال! تأكد من صحة الكود.");
-                goBackToMenu();
-            });
-        }
-
-        function setupConnection() {
-            conn.on('open', () => {
-                statusText.innerText = "تم الاتصال!";
-                resetBoard();
-            });
-            conn.on('data', (data) => {
-                if (data.type === 'move') {
-                    const idx = data.index;
-                    boardState[idx] = data.player;
-                    const cell = document.querySelector(`.cell[data-index="${idx}"]`);
-                    cell.innerText = data.player;
-                    cell.classList.add(data.player.toLowerCase());
-                    if (checkResult(data.player, idx)) return;
-                    currentPlayer = data.player === 'X' ? 'O' : 'X';
-                    statusText.innerText = "دورك الآن!";
-                    statusText.style.color = "#22c55e";
-                } else if (data.type === 'reset') {
-                    resetBoard();
-                }
-            });
-            conn.on('close', () => {
-                alert("الخصم خرج من اللعبة!");
-                goBackToMenu();
-            });
-        }
-
-        cells.forEach(cell => {
-            cell.addEventListener('click', () => handleCellClick(cell));
-        });
-
-        restartBtn.addEventListener('click', () => {
-            if (currentMode === 'online' && conn && conn.open) {
-     = 'none';
-            restartBtn.style.display = 'none';
-            roomInfo.innerText = "";
-            document.getElementById('roomCodeInput').value = "";
-            statusText.innerText = "اختر وضعية اللعب";
-            isOnline = false;
-        }
-
-        // --- توابع اصلی بازی ---
-        function resetBoard() {
-            if (botTimeout) clearTimeout(botTimeout);
-            boardState = ['', '', '', '', '', '', '', '', ''];
-            gameActive = true;
-            currentPlayer = 'X';
-            restartBtn.style.display = 'none';
-            
-            cells.forEach(cell => {
-                cell.innerText = '';
-                cell.className = 'cell'; 
-            });
-
-            if (currentMode === 'bot') {
-                statusText.innerText = "دورك! اختر مربعاً (أنت X)";
-                statusText.style.color = "#fbbf24";
-            } else if (currentMode === 'local') {
-                statusText.innerText = "دور اللاعب X";
-                statusText.style.color = "#60a5fa";
-            } else if (currentMode === 'online') {
-                if (mySymbol === 'X') statusText.innerText = "أنت X - دورك";
-                else statusText.innerText = "أنت O - انتظر دورك";
-            }
-        }
-
-        function handleCellClick(cell) {
-            const index = parseInt(cell.getAttribute('data-index'));
-            
-            if (!gameActive || boardState[index] !== '') return;
-
-            if (currentMode === 'bot') {
-                if (currentPlayer !== 'X') return; // در حالت ربات فقط X (کاربر) می‌تواند کلیک کند
-                boardState[index] = 'X';
-                cell.innerText = 'X';
-                cell.classList.add('x');
-                
-                if (checkResult('X', index)) return;
-
-                gameActive = false;
-                statusText.innerText = "الكمبيوتر يفكر... 🤖";
-                statusText.style.color = "#ef4444";
-                setTimeout(botMove, 600);
-
-            } else if (currentMode === 'local') {
-                boardState[index] = currentPlayer;
-                cell.innerText = currentPlayer;
-                cell.classList.add(currentPlayer.toLowerCase());
-                
-                if (checkResult(currentPlayer, index)) return;
-
-                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                statusText.innerText = `دور اللاعب ${currentPlayer}`;
-                statusText.style.color = currentPlayer === 'X' ? "#60a5fa" : "#ef4444";
-
-            } else if (currentMode === 'online') {
-                if (currentPlayer !== mySymbol || !conn || !conn.open) return;
-                
-                boardState[index] = mySymbol;
-                cell.innerText = mySymbol;
-                cell.classList.add(mySymbol.toLowerCase());
-                
-                conn.send({ type: 'move', index: index, player: mySymbol });
-
-                if (checkResult(mySymbol, index)) return;
-
-                currentPlayer = mySymbol === 'X' ? 'O' : 'X';
-                statusText.innerText = "انتظر دور الخصم...";
-                statusText.style.color = "#fbbf24";
-            }
-        }
-
-        // --- توابع ربات ---
-        function botMove() {
-            let moveIndex = -1;
-            
-            if (Math.random() < 0.7) {
-                let bestScore = -Infinity;
-                for (let i = 0; i < boardState.length; i++) {
-                    if (boardState[i] === '') {
-                        boardState[i] = 'O';
-                        let score = minimax(boardState, 0, false);
-                        boardState[i] = '';
-                        if (score > bestScore) {
-                            bestScore = score;
-                            moveIndex = i;
-                        }
-                    }
-                }
-            } else {
-                let emptyCells = [];
-                boardState.forEach((val, i) => { if (val === '') emptyCells.push(i); });
-                moveIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-            }
-
-            boardState[moveIndex] = 'O';
-            let botCell = document.querySelector(`.cell[data-index="${moveIndex}"]`);
-            botCell.innerText = 'O';
-            botCell.classList.add('o');
-
-            if (checkResult('O', moveIndex)) return;
-
-            gameActive = true;
-            statusText.innerText = "دورك! اختر مربعاً (أنت X)";
-            statusText.style.color = "#fbbf24";
-        }
-
-        function minimax(board, depth, isMaximizing) {
-            let result = checkWinnerForMinimax(board);
-            if (result !== null) {
-                if (result === 'O') return 10 - depth;
-                if (result === 'X') return depth - 10;
-                if (result === 'draw') return 0;
-            }
-
-            if (isMaximizing) {
-                let bestScore = -Infinity;
-                for (let i = 0; i < board.length; i++) {
-                    if (board[i] === '') {
-                        board[i] = 'O';
-                        let score = minimax(board, depth + 1, false);
-                        board[i] = '';
-                        bestScore = Math.max(score, bestScore);
-                    }
-                }
-                return bestScore;
-            } else {
-                let bestScore = Infinity;
-                for (let i = 0; i < board.length; i++) {
-                    if (board[i] === '') {
-                        board[i] = 'X';
-                        let score = minimax(board, depth + 1, true);
-                        board[i] = '';
-                        bestScore = Math.min(score, bestScore);
-                    }
-                }
-                return bestScore;
-            }
-        }
-
-        function checkWinnerForMinimax(board) {
-            for (let i = 0; i < winConditions.length; i++) {
-                let [a, b, c] = winConditions[i];
-                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-                    return board[a];
-                }
-            }
-            if (!board.includes('')) return 'draw';
-            return null;
-        }
-
-        // --- بررسی نتیجه بازی ---
-        function checkResult(player, lastIndex) {
-            let roundWon = false;
-            let winCombo = null;
-
-            for (let i = 0; i < winConditions.length; i++) {
-                let [a, b, c] = winConditions[i];
-                if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
-                    roundWon = true;
-                    winCombo = [a, b, c];
-                    break;
-                }
-            }
-
-            if (roundWon) {
-                gameActive = false;
-                winCombo.forEach(idx => {
-                    document.querySelector(`.cell[data-index="${idx}"]`).classList.add('win');
-                });
-                
-                if (currentMode === 'bot') {
-                    if (player === 'X') {
-                        statusText.innerText = humanWinMessages[Math.floor(Math.random() * humanWinMessages.length)];
-                        statusText.style.color = "#22c55e";
-                    } else {
-                        statusText.innerText = botWinMessages[Math.floor(Math.random() * botWinMessages.length)];
-                        statusText.style.color = "#ef4444";
-                    }
-                } else {
-                    statusText.innerText = `اللاعب ${player} فاز! 🎉`;
-                    statusText.style.color = "#22c55e";
-                }
-                
-                if (currentMode !== 'online' || player === mySymbol) {
-                    restartBtn.style.display = 'block';
-                } else {
-                    restartBtn.style.display = 'block'; // در آنلاین هر دو می‌بینند ولی فقط سازنده می‌تواند ریست کند (در ادامه مدیریت می‌شود)
-                }
-                return true;
-            }
-
-            if (!boardState.includes('')) {
-                gameActive = false;
-                statusText.innerText = drawMessages[Math.floor(Math.random() * drawMessages.length)];
-                statusText.style.color = "#fbbf24";
-                restartBtn.style.display = 'block';
-                return true;
-            }
-
-            return false;
-        }
-
-        // --- توابع آنلاین (PeerJS) ---
-        function createRoom() {
-            roomId = "XO-" + Math.floor(1000 + Math.random() * 9000).toString();
-            mySymbol = 'X';
-            roomInfo.innerHTML = `كود الغرفة: <b style="color:#4ecdc4; font-size:1.2rem;">${roomId}</b><br>انتظر الخصم...`;
-            
-            peer = new Peer(roomId);
-            
-            peer.on('open', (id) => {
-                currentMode = 'online';
-                isOnline = true;
-                onlineMenu.style.display = 'none';
-                boardDiv.style.display = 'grid';
-                resetBoard();
-            });
-
-            peer.on('connection', (connection) => {
-                conn = connection;
-                setupConnection();
-            });
-        }
-
-        function joinRoom() {
-            const code = document.getElementById('roomCodeInput').value.trim();
-            if (!code) return alert("أدخل كود الغرفة");
-
-            roomId = code;
-            mySymbol = 'O';
-            
-            peer = new Peer();
-            
-            peer.on('open', () => {
-                conn = peer.connect(roomId);
-                setupConnection();
-                
-                currentMode = 'online';
-                isOnline = true;
-                onlineMenu.style.display = 'none';
-                boardDiv.style.display = 'grid';
-                resetBoard();
-            });
-
-            peer.on('error', (err) => {
-                alert("خطأ في الاتصال! تأكد من صحة الكود.");
-                goBackToMenu();
-            });
-        }
-
-        function setupConnection() {
-            conn.on('open', () => {
-                statusText.innerText = "تم الاتصال!";
-                resetBoard();
-            });
-
-            conn.on
+</html>
