@@ -61,7 +61,7 @@
             border-radius: 20px;
             border: 2px solid #22c55e;
             transition: all 0.3s;
-            display: none; /* مخفی در منو */
+            display: none;
             align-items: center;
             gap: 8px;
         }
@@ -85,7 +85,7 @@
             display: none;
         }
         .board {
-            display: none; /* مخفی در منو */
+            display: none;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
             background: rgba(0,0,0,0.3);
@@ -163,11 +163,11 @@
     
     <!-- منوی انتخاب سطح بازی -->
     <div class="menu-container" id="mainMenu">
-        <button class="btn-menu" onclick="startGame('normal')">😊 وضع عادي (سهل)</button>
-        <button class="btn-menu" onclick="startGame('hard')">😈 وضع صعب (للمحترفين)</button>
+        <button class="btn-menu" onclick="startGame('normal')">😊 عادي (60%)</button>
+        <button class="btn-menu" onclick="startGame('hard')">🔥 X O اسطوره‌ای (80%)</button>
     </div>
 
-    <!-- بخش بازی (در ابتدا مخفی است) -->
+    <!-- بخش بازی -->
     <div class="timer-box" id="timerBox">⏱️ <span id="timerText">15</span>s</div>
     <div class="status" id="statusText"></div>
 
@@ -199,7 +199,7 @@
         
         let boardState = ['', '', '', '', '', '', '', '', ''];
         let gameActive = false;
-        let currentDifficulty = 'normal'; // normal یا hard
+        let currentDifficulty = 'normal'; 
         const HUMAN = 'X'; 
         const BOT = 'O';   
 
@@ -230,7 +230,7 @@
             "لا فائز! 🎯 لكن المرة القادمة لن أرحمك!"
         ];
 
-        // --- شروع بازی (با انتخاب سختی) ---
+        // --- شروع بازی ---
         function startGame(difficulty) {
             currentDifficulty = difficulty;
             mainMenu.style.display = 'none';
@@ -329,9 +329,13 @@
         function botMove() {
             let moveIndex = -1;
             
-            // اگر حالت سخت باشد، همیشه از هوش مصنوعی استفاده می‌کند
-            // اگر حالت عادی باشد، ۷۰٪ هوشمند و ۳۰٪ شانسی بازی می‌کند
-            let useAI = (currentDifficulty === 'hard') || (Math.random() < 0.7);
+            // تعیین درصد هوش بر اساس سختی
+            let aiChance = 0.6; // پیش فرض عادی
+            if (currentDifficulty === 'hard') {
+                aiChance = 0.8; // اسطوره‌ای
+            }
+            
+            let useAI = Math.random() < aiChance;
 
             if (useAI) {
                 let bestScore = -Infinity;
