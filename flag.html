@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خمّن الدولة | لحظة إدراك</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Cairo', Tahoma, Arial, sans-serif;
+            background: #0b0414;
+            color: #e2e8f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+        }
+        .game-container {
+            background: rgba(30, 15, 50, 0.8);
+            border: 1px solid #6b21a8;
+            border-radius: 24px;
+            padding: 20px 24px 28px;
+            width: 100%;
+            max-width: 480px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(107, 33, 168, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .back-btn {
+            background: rgba(76, 29, 149, 0.4);
+            color: #a78bfa;
+            border: 1px solid #4c1d95;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-size: 1.2rem;
+        }
+        .header-center { display: flex; align-items: center; gap: 10px; }
+        .lives { display: flex; gap: 4px; font-size: 1.2rem; }
+        .heart.lost { opacity: 0.2; filter: grayscale(1); }
+
+        .level-badge {
+            background: rgba(74, 222, 128, 0.15);
+            color: #4ade80;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            border: 1px solid rgba(74, 222, 128, 0.3);
+        }
+
+        h1 { font-size: 1.5rem; margin-bottom: 14px; color: #fbbf24; }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            background: #170a28;
+            border: 1px solid #4c1d95;
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 14px;
+            font-size: 0.8rem;
+        }
+        .stat-item { text-align: center; }
+        .stat-item .label { color: #a78bfa; display: block; margin-bottom: 2px; font-size: 0.75rem; }
+        .stat-item .value { color: #fbbf24; font-weight: 800; font-size: 1.1rem; }
+        .stat-item .value.combo { color: #f97316; }
+        .stat-item .value.record { color: #38bdf8; }
+
+        .timer-wrap {
+            background: #170a28;
+            border-radius: 8px;
+            height: 8px;
+            margin-bottom: 14px;
+            overflow: hidden;
+            border: 1px solid #4c1d95;
+        }
+        .timer-bar {
+            height: 100%;
+            width: 100%;
+            background: #22c55e;
+            transition: width 0.1s linear, background 0.3s;
+        }
+        .timer-bar.warn { background: #f59e0b; }
+        .timer-bar.danger { background: #ef4444; }
+
+        .flag-wrapper {
+            background: #170a28;
+            border: 2px solid #4c1d95;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 18px;
+            height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .flag-emoji {
+            font-size: 100px;
+            line-height: 1;
+            user-select: none;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .option-btn {
+            background: rgba(76, 29, 149, 0.4);
+            color: #e2e8f0;
+            border: 2px solid #4c1d95;
+            border-radius: 12px;
+            padding: 12px 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+            line-height: 1.4;
+        }
+        .option-btn:hover:not(:disabled) {
+            background: rgba(107, 33, 168, 0.6);
+            border-color: #a855f7;
+        }
+        .option-btn:disabled { cursor: default; }
+        .option-btn.correct {
+            background: rgba(22, 101, 52, 0.8);
+            border-color: #22c55e;
+        }
+        .option-btn.wrong {
+            background: rgba(127, 29, 29, 0.8);
+            border-color: #ef4444;
+        }
+        .option-btn .ar { display: block; font-weight: bold; }
+        .option-btn .fa { display: block; font-size: 0.8rem; color: #a78bfa; margin-top: 2px; }
+        .option-btn.correct .fa, .option-btn.wrong .fa { color: #e2e8f0; }
+
+        .message {
+            min-height: 26px;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            font-weight: bold;
+        }
+        .message.correct-msg { color: #4ade80; }
+        .message.wrong-msg { color: #f87171; }
+        .message.timeout-msg { color: #fbbf24; }
+
+        .next-btn {
+            background: #fbbf24;
+            color: #0b0414;
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: 800;
+            font-family: inherit;
+            cursor: pointer;
+            width: 100%;
+        }
+        .next-btn:disabled { background: #4c1d95; color: #a78bfa; cursor: default; }
+
+        .gameover {
+            position: absolute;
+            inset: 0;
+            background: rgba(11, 4, 20, 0.97);
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            gap: 12px;
+            z-index: 10;
+            border: 2px solid #6b21a8;
+        }
+        .gameover h2 { color: #fbbf24; font-size: 1.8rem; font-weight: 800; }
+        .gameover .final-score { color: #a855f7; font-size: 3rem; font-weight: bold; }
+        .gameover .final-label { color: #a78bfa; font-size: 0.9rem; }
+        .restart-btn {
+            background: #fbbf24;
+            color: #0b0414;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 40px;
+            font-size: 1rem;
+            font-weight: 800;
+            font-family: inherit;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div class="game-header">
+        <a href="index.html" class="back-btn">↩</a>
+        <div class="header-center">
+            <div class="lives" id="livesContainer">
+                <span class="heart">❤️</span>
+                <span class="heart">❤️</span>
+                <span class="heart">❤️</span>
+            </div>
+            <div class="level-badge" id="levelBadge">المستوى: سهل</div>
+        </div>
+    </div>
+
+    <h1>🌍 خمّن الدولة</h1>
+    
+    <div class="stats">
+        <div class="stat-item"><span class="label">النقاط</span><span class="value" id="score">0</span></div>
+        <div class="stat-item"><span class="label">التتابع</span><span class="value combo" id="combo">0</span></div>
+        <div class="stat-item"><span class="label">الرقم القياسي</span><span class="value record" id="record">0</span></div>
+    </div>
+
+    <div class="timer-wrap"><div class="timer-bar" id="timerBar"></div></div>
+
+    <div class="flag-wrapper"><div class="flag-emoji" id="flagEmoji"></div></div>
+
+    <div class="options" id="optionsContainer"></div>
+
+    <div class="message" id="message"></div>
+
+    <button class="next-btn" id="nextBtn" disabled>السؤال التالي</button>
+
+    <div class="gameover hidden" id="gameOver">
+        <h2>انتهت اللعبة!</h2>
+        <div class="final-score" id="finalScore">0</div>
+        <div class="final-label">نقاطك النهائية</div>
+        <button class="restart-btn" id="restartBtn">العب مرة أخرى</button>
+    </div>
+</div>
+
+<script>
+    const COUNTRIES = [
+        { ar: 'الولايات المتحدة', fa: 'آمریکا', flag: '🇺🇸', level: 1 },
+        { ar: 'اليابان', fa: 'ژاپن', flag: '🇯🇵', level: 1 },
+        { ar: 'البرازيل', fa: 'برزیل', flag: '🇧🇷', level: 1 },
+        { ar: 'بريطانيا', fa: 'انگلیس', flag: '🇬🇧', level: 1 },
+        { ar: 'كندا', fa: 'کانادا', flag: '🇨🇦', level: 1 },
+        { ar: 'فرنسا', fa: 'فرانسه', flag: '🇫🇷', level: 1 },
+        { ar: 'الصين', fa: 'چین', flag: '🇨🇳', level: 1 },
+        { ar: 'مصر', fa: 'مصر', flag: '🇪🇬', level: 1 },
+        { ar: 'ألمانيا', fa: 'آلمان', flag: '🇩🇪', level: 1 },
+        { ar: 'السعودية', fa: 'عربستان', flag: '🇸🇦', level: 1 },
+        { ar: 'روسيا', fa: 'روسیه', flag: '🇷🇺', level: 1 },
+        { ar: 'إيران', fa: 'ایران', flag: '🇮🇷', level: 1 },
+        { ar: 'تركيا', fa: 'ترکیه', flag: '🇹🇷', level: 1 },
+        { ar: 'إيطاليا', fa: 'ایتالیا', flag: '🇮🇹', level: 1 },
+        { ar: 'إسبانيا', fa: 'اسپانیا', flag: '🇪🇸', level: 1 },
+        
+        { ar: 'الإمارات', fa: 'امارات', flag: '🇦🇪', level: 2 },
+        { ar: 'العراق', fa: 'عراق', flag: '🇮🇶', level: 2 },
+        { ar: 'سوريا', fa: 'سوریه', flag: '🇸🇾', level: 2 },
+        { ar: 'لبنان', fa: 'لبنان', flag: '🇱🇧', level: 2 },
+        { ar: 'الأردن', fa: 'اردن', flag: '🇯🇴', level: 2 },
+        { ar: 'الكويت', fa: 'کویت', flag: '🇰🇼', level: 2 },
+        { ar: 'قطر', fa: 'قطر', flag: '🇶🇦', level: 2 },
+        { ar: 'اليمن', fa: 'یمن', flag: '🇾🇪', level: 2 },
+        { ar: 'فلسطين', fa: 'فلسطین', flag: '🇵🇸', level: 2 },
+        { ar: 'المغرب', fa: 'مراکش', flag: '🇲🇦', level: 2 },
+        { ar: 'الجزائر', fa: 'الجزایر', flag: '🇩🇿', level: 2 },
+        { ar: 'تونس', fa: 'تونس', flag: '🇹🇳', level: 2 },
+        { ar: 'ليبيا', fa: 'لیبی', flag: '🇱🇾', level: 2 },
+        { ar: 'السودان', fa: 'سودان', flag: '🇸🇩', level: 2 },
+        { ar: 'هولندا', fa: 'هلند', flag: '🇳🇱', level: 2 },
+        { ar: 'بلجيكا', fa: 'بلژیک', flag: '🇧🇪', level: 2 },
+        { ar: 'سويسرا', fa: 'سوئیس', flag: '🇨🇭', level: 2 },
+        { ar: 'السويد', fa: 'سوئد', flag: '🇸🇪', level: 2 },
+        { ar: 'النرويج', fa: 'نروژ', flag: '🇳🇴', level: 2 },
+        { ar: 'فنلندا', fa: 'فنلاند', flag: '🇫🇮', level: 2 },
+        { ar: 'اليونان', fa: 'یونان', flag: '🇬🇷', level: 2 },
+        { ar: 'بولندا', fa: 'لهستان', flag: '🇵🇱', level: 2 },
+        { ar: 'كوريا الجنوبية', fa: 'کره جنوبی', flag: '🇰🇷', level: 2 },
+        { ar: 'الهند', fa: 'هند', flag: '🇮🇳', level: 2 },
+        { ar: 'أستراليا', fa: 'استرالیا', flag: '🇦🇺', level: 2 },
+        { ar: 'المكسيك', fa: 'مکزیک', flag: '🇲🇽', level: 2 },
+        { ar: 'الأرجنتين', fa: 'آرژانتین', flag: '🇦🇷', level: 2 },
+
+        { ar: 'تشاد', fa: 'چاد', flag: '🇹🇩', level: 3 },
+        { ar: 'رومانيا', fa: 'رومانی', flag: '🇷🇴', level: 3 },
+        { ar: 'مولدوفا', fa: 'مولداوی', flag: '🇲🇩', level: 3 },
+        { ar: 'أندورا', fa: 'آندورا', flag: '🇦🇩', level: 3 },
+        { ar: 'إندونيسيا', fa: 'اندونزی', flag: '🇮🇩', level: 3 },
+        { ar: 'موناكو', fa: 'موناکو', flag: '🇲🇨', level: 3 },
+        { ar: 'سنغافورة', fa: 'سنگاپور', flag: '🇸🇬', level: 3 },
+        { ar: 'مالطا', fa: 'مالت', flag: '🇲🇹', level: 3 },
+        { ar: 'نيوزيلندا', fa: 'نیوزیلند', flag: '🇳🇿', level: 3 },
+        { ar: 'فيجي', fa: 'فیجی', flag: '🇫🇯', level: 3 },
+        { ar: 'لاتفيا', fa: 'لتونی', flag: '🇱🇻', level: 3 },
+        { ar: 'ليتوانيا', fa: 'لیتوانی', flag: '🇱🇹', level: 3 },
+        { ar: 'إستونيا', fa: 'استونی', flag: '🇪🇪', level: 3 },
+        { ar: 'سلوفينيا', fa: 'اسلوونی', flag: '🇸🇮', level: 3 },
+        { ar: 'سلوفاكيا', fa: 'اسلواکی', flag: '🇸🇰', level: 3 },
+        { ar: 'كرواتيا', fa: 'کرواسی', flag: '🇭🇷', level: 3 },
+        { ar: 'صربيا', fa: 'صربستان', flag: '🇷🇸', level: 3 },
+        { ar: 'أرمينيا', fa: 'ارمنستان', flag: '🇦🇲', level: 3 },
+        { ar: 'جورجيا', fa: 'گرجستان', flag: '🇬🇪', level: 3 },
+        { ar: 'أذربيجان', fa: 'آذربایجان', flag: '🇦🇿', level: 3 },
+        { ar: 'قيرغيزستان', fa: 'قرقیزستان', flag: '🇰🇬', level: 3 },
+        { ar: 'منغوليا', fa: 'مغولستان', flag: '🇲🇳', level: 3 }
+    ];
+
+    const TIME_LIMIT = 8;
+    const MAX_LIVES = 3;
+
+    let currentAnswer = null;
+    let score = 0;
+    let combo = 0;
+    let record = parseInt(localStorage.getItem('flagRecord') || '0', 10);
+    let lives = MAX_LIVES;
+    let answered = false;
+    let timeLeft = TIME_LIMIT;
+    let timerId = null;
+    let questionCount = 0;
+
+    const flagEl = document.getElementById('flagEmoji');
+    const optionsEl = document.getElementById('optionsContainer');
+    const msgEl = document.getElementById('message');
+    const nextBtn = document.getElementById('nextBtn');
+    const scoreEl = document.getElementById('score');
+    const comboEl = document.getElementById('combo');
+    const recordEl = document.getElementById('record');
+    const timerBar = document.getElementById('timerBar');
+    const heartsEl = document.getElementById('livesContainer');
+    const levelBadge = document.getElementById('levelBadge');
+    const gameOverEl = document.getElementById('gameOver');
+    const finalScoreEl = document.getElementById('finalScore');
+    const restartBtn = document.getElementById('restartBtn');
+
+    recordEl.textContent = record;
+
+    function shuffle(arr) {
+        let currentIndex = arr.length, randomIndex;
+        while (currentIndex != 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [arr[currentIndex], arr[randomIndex]] = [arr[randomIndex], arr[currentIndex]];
+        }
+        return arr;
+    }
+
+    function updateHearts() {
+        const hearts = heartsEl.querySelectorAll('.heart');
+        hearts.forEach((h, i) => {
+            if (i < lives) h.classList.remove('lost');
+            else h.classList.add('lost');
+        });
+    }
+
+    function startTimer() {
+        clearInterval(timerId);
+        timeLeft = TIME_LIMIT;
+        timerBar.style.width = '100%';
+        timerBar.className = 'timer-bar';
+        
+        timerId = setInterval(() => {
+            timeLeft -= 0.1;
+            let pct = (timeLeft / TIME_LIMIT) * 100;
+            timerBar.style.width = pct + '%';
+            
+            if (pct <= 30) timerBar.className = 'timer-bar danger';
+            else if (pct <= 60) timerBar.className = 'timer-bar warn';
+            
+            if (timeLeft <= 0) {
+                clearInterval(timerId);
+                handleTimeout();
+            }
+        }, 100);
+    }
+
+    function handleTimeout() {
+        if (answered) return;
+        answered = true;
+        combo = 0;
+        comboEl.textContent = 0;
+        
+        Array.from(optionsEl.children).forEach(b => {
+            b.disabled = true;
+            if (b.dataset.name === currentAnswer.ar) b.classList.add('correct');
+        });
+        
+        msgEl.textContent = `⏰ انتهى الوقت! الإجابة: ${currentAnswer.ar} — ${currentAnswer.fa}`;
+        msgEl.className = 'message timeout-msg';
+        
+        loseLife();
+    }
+
+    function loseLife() {
+        lives--;
+        updateHearts();
+        if (lives <= 0) {
+            setTimeout(endGame, 800);
+        } else {
+            nextBtn.disabled = false;
+        }
+    }
+
+    function newQuestion() {
+        if (lives <= 0) return;
+        
+        answered = false;
+        msgEl.textContent = '';
+        msgEl.className = 'message';
+        nextBtn.disabled = true;
+        optionsEl.innerHTML = '';
+        
+        questionCount++;
+        
+        let level = 1;
+        if (questionCount > 10) level = 3;
+        else if (questionCount > 5) level = 2;
+        
+        if (level === 1) { levelBadge.textContent = 'المستوى: سهل'; levelBadge.style.color = '#4ade80'; }
+        else if (level === 2) { levelBadge.textContent = 'المستوى: متوسط'; levelBadge.style.color = '#fbbf24'; }
+        else { levelBadge.textContent = 'المستوى: صعب'; levelBadge.style.color = '#f87171'; }
+
+        let pool = COUNTRIES.filter(c => c.level === level);
+        currentAnswer = pool[Math.floor(Math.random() * pool.length)];
+        flagEl.textContent = currentAnswer.flag;
+        
+        let wrongs = COUNTRIES.filter(c => c.ar !== currentAnswer.ar);
+        shuffle(wrongs);
+        wrongs = wrongs.slice(0, 3);
+        
+        let options = [currentAnswer, ...wrongs];
+        shuffle(options);
+        
+        options.forEach(c => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerHTML = `<span class="ar">${c.ar}</span><span class="fa">${c.fa}</span>`;
+            btn.dataset.name = c.ar;
+            btn.onclick = () => checkAnswer(btn, c.ar);
+            optionsEl.appendChild(btn);
+        });
+        
+        startTimer();
+    }
+
+    function checkAnswer(btn, chosen) {
+        if (answered) return;
+        answered = true;
+        clearInterval(timerId);
+        
+        Array.from(optionsEl.children).forEach(b => b.disabled = true);
+        
+        if (chosen === currentAnswer.ar) {
+            btn.classList.add('correct');
+            combo++;
+            let points = 10 * combo;
+            score += points;
+            scoreEl.textContent = score;
+            comboEl.textContent = combo;
+            msgEl.textContent = `✅ صحيح! +${points} نقاط`;
+            msgEl.className = 'message correct-msg';
+            nextBtn.disabled = false;
+        } else {
+            btn.classList.add('wrong');
+            combo = 0;
+            comboEl.textContent = 0;
+            msgEl.textContent = `❌ خطأ! الإجابة: ${currentAnswer.ar}`;
+            msgEl.className = 'message wrong-msg';
+            
+            Array.from(optionsEl.children).forEach(b => {
+                if (b.dataset.name === currentAnswer.ar) b.classList.add('correct');
+            });
+            
+            loseLife();
+        }
+    }
+
+    function endGame() {
+        clearInterval(timerId);
+        if (score > record) {
+            record = score;
+            localStorage.setItem('flagRecord', record);
+            recordEl.textContent = record;
+        }
+        finalScoreEl.textContent = score;
+        gameOverEl.classList.remove('hidden');
+    }
+
+    function resetGame() {
+        score = 0;
+        combo = 0;
+        lives = MAX_LIVES;
+        questionCount = 0;
+        scoreEl.textContent = 0;
+        comboEl.textContent = 0;
+        updateHearts();
+        gameOverEl.classList.add('hidden');
+        newQuestion();
+    }
+
+    nextBtn.onclick = newQuestion;
+    restartBtn.onclick = resetGame;
+
+    newQuestion();
+</script>
+
+</body>
+  </html>
