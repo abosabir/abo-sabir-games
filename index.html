@@ -126,6 +126,7 @@
             <div class="game-desc">كن الأسرع</div>
         </div>
         
+        <!-- این بخش تغییر کرده و به xo_new.html لینک شده -->
         <div class="game-card" onclick="openGame('X O')">
             <img src="https://cdn-icons-png.flaticon.com/512/566/566294.png" class="game-img">
             <div class="game-title">X O</div>
@@ -175,7 +176,8 @@
         } else if (gameName === 'ترتيب الحروف') {
             window.location.href = 'words.html';
         } else if (gameName === 'X O') {
-            window.location.href = 'xo_new.html'; /* <--- اینجا تغییر کرد */
+            // اینجا اسم فایل رو دقیقا برابر با فایل بازی گذاشتیم
+            window.location.href = 'xo_new.html'; 
         } else if (gameName === 'حافظه') {
             window.location.href = 'memory.html';
         } else if (gameName === 'خمن الدولة') {
