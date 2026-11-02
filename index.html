@@ -8,7 +8,9 @@
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
         body { background: radial-gradient(circle at top, #2d154a, #0d0416); color: white; display: flex; justify-content: center; min-height: 100vh; }
-        .app-container { width: 100%; max-width: 480px; padding: 15px; padding-bottom: 80px; }
+        
+        /* فاصله پایین بیشتر شد تا کارت‌ها روی منو نیفتن */
+        .app-container { width: 100%; max-width: 480px; padding: 15px; padding-bottom: 120px; }
         
         .social-section {
             background: linear-gradient(145deg, rgba(61, 27, 99, 0.6), rgba(33, 16, 51, 0.8));
@@ -141,6 +143,21 @@
             <div class="game-emoji" style="font-size: 22px; font-weight: 900; color: #c084fc; text-shadow: 0 0 10px rgba(192, 132, 252, 0.5);">ترتيب الحروف</div>
             <div class="game-desc">بلا حدود</div>
         </div>
+
+        <!-- بازی پرچم -->
+        <div class="game-card" onclick="openGame('خمن الدولة')">
+            <div class="game-emoji" style="text-shadow: 0 0 15px rgba(74, 222, 128, 0.5);">🌍</div>
+            <div class="game-title">خمن الدولة</div>
+            <div class="game-desc">اعرف الأعلام</div>
+        </div>
+
+        <!-- بازی اشیا (میوه و حیوان) -->
+        <div class="game-card" onclick="openGame('خمن الشيء')">
+            <div class="game-emoji" style="text-shadow: 0 0 15px rgba(251, 191, 36, 0.5);">🎲</div>
+            <div class="game-title">خمن الشيء</div>
+            <div class="game-desc">اعرف الأشياء</div>
+        </div>
+
     </div>
 </div>
 
@@ -165,10 +182,14 @@
             window.location.href = 'x_o.html';
         } else if (gameName === 'حافظه') {
             window.location.href = 'memory.html';
+        } else if (gameName === 'خمن الدولة') {
+            window.location.href = 'flag.html';
+        } else if (gameName === 'خمن الشيء') {
+            window.location.href = 'fruit.html';
         } else {
             alert("لعبة " + gameName + " قريباً جداً! 🎮");
         }
     }
 </script>
 </body>
-  </html>
+</html>
