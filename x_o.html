@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة X O 🎮</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap');
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+        body {
+            background: radial-gradient(circle at top, #2d154a, #0d0416);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px 15px;
+        }
+        .header-title {
+            font-size: 36px;
+            font-weight: 900;
+            background: linear-gradient(to bottom, #fbbf24, #b45309);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+            text-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+        }
+        .menu-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 20px;
+        }
+        .btn-menu {
+            background: linear-gradient(to bottom, #7c3aed, #4c1d95);
+            border: 2px solid #a855f7;
+            border-radius: 15px;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #2e1065;
+            transition: 0.2s;
+        }
+        .btn-menu:active { transform: translateY(4px); box-shadow: 0 1px 0 #2e1065; }
+        .btn-menu:hover { background: #6d28d9; }
+
+        .timer-box {
+            font-size: 22px;
+            font-weight: 900;
+            color: #22c55e;
+            margin-bottom: 15px;
+            background: rgba(0,0,0,0.4);
+            padding: 5px 20px;
+            border-radius: 20px;
+            border: 2px solid #22c55e;
+            transition: all 0.3s;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+        .timer-box.warning {
+            color: #ef4444;
+            border-color: #ef4444;
+            animation: pulseTimer 0.5s infinite alternate;
+        }
+        @keyframes pulseTimer {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+        .status {
+            font-size: 20px;
+            font-weight: bold;
+            color: #fbbf24;
+            margin-bottom: 20px;
+            text-align: center;
+            min-height: 30px;
+            text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+            display: none;
+        }
+        .board {
+            display: none;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 20px;
+            border: 2px solid #581c87;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            margin-bottom: 30px;
+        }
+        .cell {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(145deg, #3d1b63, #211033);
+            border: 2px solid #7c3aed;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 5px 0 #1e0a3c;
+            user-select: none;
+        }
+        .cell:hover { background: #4c1d95; border-color: #a855f7; }
+        .cell:active { transform: translateY(4px); box-shadow: 0 1px 0 #1e0a3c; }
+        .cell.x { color: #60a5fa; text-shadow: 0 0 15px #3b82f6; }
+        .cell.o { color: #ef4444; text-shadow: 0 0 15px #ef4444; }
+        .cell.win {
+            background: linear-gradient(145deg, #15803d, #064e3b);
+            border-color: #22c55e;
+            animation: pulseWin 0.5s infinite alternate;
+        }
+        @keyframes pulseWin {
+            from { transform: scale(1); box-shadow: 0 0 10px #22c55e; }
+            to { transform: scale(1.05); box-shadow: 0 0 25px #22c55e; }
+        }
+        .btn-restart {
+            background: linear-gradient(to bottom, #fbbf24, #d97706);
+            border: 2px solid #fff;
+            border-radius: 15px;
+            padding: 15px 40px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #000;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #92400e;
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .btn-restart:active { transform: translateY(4px); box-shadow: 0 1px 0 #92400e; }
+        .btn-back {
+            background: linear-gradient(to bottom, #ef4444, #b91c1c);
+            border: 2px solid #fca5a5;
+            border-radius: 10px;
+            padding: 10px 20px;
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #7f1d1d;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-back:active { transform: translateY(3px); box-shadow: 0 1px 0 #7f1d1d; }
+    </style>
+</head>
+<body>
+
+    <div class="header-title">X O 🎮</div>
+    
+    <div class="menu-container" id="mainMenu">
+        <button class="btn-menu" onclick="startGame('normal')">😊 عادي (60%)</button>
+        <button class="btn-menu" onclick="startGame('hard')">🔥 X O اسطوره‌ای (80%)</button>
+    </div>
+
+    <div class="timer-box" id="timerBox">⏱️ <span id="timerText">15</span>s</div>
+    <div class="status" id="statusText"></div>
+
+    <div class="board" id="board">
+        <div class="cell" data-index="0"></div>
+        <div class="cell" data-index="1"></div>
+        <div class="cell" data-index="2"></div>
+        <div class="cell" data-index="3"></div>
+        <div class="cell" data-index="4"></div>
+        <div class="cell" data-index="5"></div>
+        <div class="cell" data-index="6"></div>
+        <div class="cell" data-index="7"></div>
+        <div class="cell" data-index="8"></div>
+    </div>
+
+    <button class="btn-restart" id="restartBtn" onclick="restartGame()">🔄 العب مرة أخرى</button>
+    
+    <a href="index.html" class="btn-back">🔙 العودة للرئيسية</a>
+
+    <script>
+        const statusText = document.getElementById('statusText');
+        const cells = document.querySelectorAll('.cell');
+        const restartBtn = document.getElementById('restartBtn');
+        const timerText = document.getElementById('timerText');
+        const timerBox = document.getElementById('timerBox');
+        const mainMenu = document.getElementById('mainMenu');
+        const board = document.getElementById('board');
+        
+        let boardState = ['', '', '', '', '', '', '', '', ''];
+        let gameActive = false;
+        let currentDifficulty = 'normal'; 
+        const HUMAN = 'X'; 
+        const BOT = 'O';   
+
+        let timeLeft = 15;
+        let timerInterval = null;
+        const MAX_TIME = 15;
+
+        const winConditions = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], 
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], 
+            [0, 4, 8], [2, 4, 6]             
+        ];
+
+        const botWinMessages = [
+            "ههههه! فرت عليك! 😂 تلعب مثل الأطفال!",
+            "الكمبيوتر دائماً يفوز! 😎 لا تحاول مجدداً!",
+            "خسرت! 🏆 أنا الأسطورة الحقيقية هنا!"
+        ];
+        const humanWinMessages = [
+            "😡 حسناً حسناً.. لقد فزت! بس المرة الجاية سأسحقك!",
+            "أوه! 🥊 ضربة حظ.. دور آخر وسأريك من أنا!",
+            "لا تفرح! 💢 هذه مجرد بداية، سأنتقم!"
+        ];
+        const drawMessages = [
+            "🤝 تعادل! لكنني سأفوز في المرة القادمة!",
+            "تعادل.. 🤨 أنت أفضل مما توقعت!",
+            "لا فائز! 🎯 لكن المرة القادمة لن أرحمك!"
+        ];
+
+        function startGame(difficulty) {
+            currentDifficulty = difficulty;
+            mainMenu.style.display = 'none';
+            board.style.display = 'grid';
+            timerBox.style.display = 'flex';
+            statusText.style.display = 'block';
+            resetBoard();
+        }
+
+        function restartGame() {
+            resetBoard();
+        }
+
+        function resetBoard() {
+            boardState = ['', '', '', '', '', '', '', '', ''];
+            gameActive = true;
+            statusText.innerText = "دورك! اختر مربعاً (أنت X)";
+            statusText.style.color = "#fbbf24";
+            restartBtn.style.display = 'none';
+            
+            cells.forEach(cell => {
+                cell.innerText = '';
+                cell.className = 'cell'; 
+                cell.onclick = () => handleCellClick(cell);
+            });
+            resetTimer();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timeLeft = MAX_TIME;
+            updateTimerUI();
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerUI();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timeOut();
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        function resetTimer() {
+            stopTimer();
+            timeLeft = MAX_TIME;
+            updateTimerUI();
+            startTimer();
+        }
+
+        function updateTimerUI() {
+            timerText.innerText = timeLeft;
+            if (timeLeft <= 5) {
+                timerBox.classList.add('warning');
+            } else {
+                timerBox.classList.remove('warning');
+            }
+        }
+
+        function timeOut() {
+            gameActive = false;
+            statusText.innerText = "⏰ انتهى وقتك! خسرت! الكمبيوتر يفوز!";
+            statusText.style.color = "#ef4444";
+            restartBtn.style.display = 'block';
+            cells.forEach(cell => cell.onclick = null);
+        }
+
+        function handleCellClick(cell) {
+            const index = parseInt(cell.getAttribute('data-index'));
+            if (!gameActive || boardState[index] !== '') return;
+
+            stopTimer();
+            boardState[index] = HUMAN;
+            cell.innerText = HUMAN;
+            cell.classList.add('x');
+            
+            if (checkResult()) return;
+
+            gameActive = false;
+            statusText.innerText = "الكمبيوتر يفكر... 🤖";
+            statusText.style.color = "#ef4444";
+            
+            setTimeout(botMove, 600);
+        }
+
+        function botMove() {
+            let moveIndex = -1;
+            let aiChance = (currentDifficulty === 'hard') ? 0.8 : 0.6;
+            let useAI = Math.random() < aiChance;
+
+            if (useAI) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < boardState.length; i++) {
+                    if (boardState[i] === '') {
+                        boardState[i] = BOT;
+                        let score = minimax(boardState, 0, false);
+                        boardState[i] = '';
+                        if (score > bestScore) {
+                            bestScore = score;
+                            moveIndex = i;
+                        }
+                    }
+                }
+            } else {
+                let emptyCells = [];
+                boardState.forEach((val, i) => { if (val === '') emptyCells.push(i); });
+                moveIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+            }
+
+            boardState[moveIndex] = BOT;
+            let botCell = document.querySelector(`.cell[data-index="${moveIndex}"]`);
+            botCell.innerText = BOT;
+            botCell.classList.add('o');
+
+            if (checkResult()) return;
+
+            gameActive = true;
+            statusText.innerText = "دورك! اختر مربعاً (أنت X)";
+            statusText.style.color = "#fbbf24";
+            startTimer();
+        }
+
+        function minimax(board, depth, isMaximizing) {
+            let result = checkWinnerForMinimax(board);
+            if (result !== null) {
+                if (result === BOT) return 10 - depth;
+                if (result === HUMAN) return depth - 10;
+                if (result === 'draw') return 0;
+            }
+
+            if (isMaximizing) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < board.length; i++) {
+                    if (board[i] === '') {
+                        board[i] = BOT;
+                        let score = minimax(board, depth + 1, false);
+                        board[i] = '';
+                        bestScore = Math.max(score, bestScore);
+                    }
+                }
+                return bestScore;
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < board.length; i++) {
+                    if (board[i] === '') {
+                        board[i] = HUMAN;
+                        let score = minimax(board, depth + 1, true);
+                        board[i] = '';
+                        bestScore = Math.min(score, bestScore);
+                    }
+                }
+                return bestScore;
+            }
+        }
+
+        function checkWinnerForMinimax(board) {
+            for (let i = 0; i < winConditions.length; i++) {
+                let [a, b, c] = winConditions[i];
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    return board[a];
+                }
+            }
+            if (!board.includes('')) return 'draw';
+            return null;
+        }
+
+        function checkResult() {
+            let roundWon = false;
+            let winCombo = null;
+
+            for (let i = 0; i < winConditions.length; i++) {
+                let [a, b, c] = winConditions[i];
+                if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
+                    roundWon = true;
+                    winCombo = [a, b, c];
+                    break;
+                }
+            }
+
+            if (roundWon) {
+                gameActive = false;
+                stopTimer();
+                winCombo.forEach(idx => {
+                    document.querySelector(`.cell[data-index="${idx}"]`).classList.add('win');
+                });
+                
+                if (boardState[winCombo[0]] === HUMAN) {
+                    statusText.innerText = humanWinMessages[Math.floor(Math.random() * humanWinMessages.length)];
+                    statusText.style.color = "#22c55e";
+                } else {
+                    statusText.innerText = botWinMessages[Math.floor(Math.random() * botWinMessages.length)];
+                    statusText.style.color = "#ef4444";
+                }
+                restartBtn.style.display = 'block';
+                return true;
+            }
+
+            if (!boardState.includes('')) {
+                gameActive = false;
+                stopTimer();
+                statusText.innerText = drawMessages[Math.floor(Math.random() * drawMessages.length)];
+                statusText.style.color = "#fbbf24";
+                restartBtn.style.display = 'block';
+                return true;
+            }
+
+            return false;
+        }
+    </script>
+</body>
+  </html>
