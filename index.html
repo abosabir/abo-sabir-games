@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>قناة لحظه ادراك</title>
+    <!-- اضافه کردن PeerJS برای بازی آنلاین -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
@@ -11,6 +13,8 @@
         
         .app-container { width: 100%; max-width: 480px; padding: 15px; padding-bottom: 120px; }
         
+        /* --- استایل صفحه اصلی --- */
+        #mainPage { display: block; }
         .social-section {
             background: linear-gradient(145deg, rgba(61, 27, 99, 0.6), rgba(33, 16, 51, 0.8));
             border: 1px solid #581c87;
@@ -77,90 +81,282 @@
         .nav-item { text-align: center; color: #6b7280; font-size: 12px; }
         .nav-item.active { color: #fbbf24; }
         .nav-icon { font-size: 20px; display: block; margin-bottom: 5px; }
+
+        /* --- استایل بازی X O --- */
+        #xoPage { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; }
+        
+        .xo-header-title {
+            font-size: 36px;
+            font-weight: 900;
+            background: linear-gradient(to bottom, #fbbf24, #b45309);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+        }
+
+        .menu-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 20px;
+        }
+        .btn-menu {
+            background: linear-gradient(to bottom, #7c3aed, #4c1d95);
+            border: 2px solid #a855f7;
+            border-radius: 15px;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #2e1065;
+            transition: 0.2s;
+        }
+        .btn-menu:active { transform: translateY(4px); box-shadow: 0 1px 0 #2e1065; }
+        .btn-menu:hover { background: #6d28d9; }
+
+        .online-box {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-width: 300px;
+            background: rgba(0,0,0,0.4);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #581c87;
+            margin-bottom: 20px;
+        }
+        .online-box input {
+            padding: 12px;
+            border-radius: 10px;
+            border: 2px solid #7c3aed;
+            background: #211033;
+            color: white;
+            font-size: 16px;
+            text-align: center;
+            outline: none;
+        }
+        .room-info { font-size: 14px; color: #fbbf24; text-align: center; margin: 5px 0; line-height: 1.5;}
+
+        .xo-status {
+            font-size: 20px;
+            font-weight: bold;
+            color: #fbbf24;
+            margin-bottom: 20px;
+            text-align: center;
+            min-height: 30px;
+            text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 20px;
+            border: 2px solid #581c87;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .cell {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(145deg, #3d1b63, #211033);
+            border: 2px solid #7c3aed;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 5px 0 #1e0a3c;
+            user-select: none;
+        }
+        
+        .cell:hover { background: #4c1d95; border-color: #a855f7; }
+        .cell:active { transform: translateY(4px); box-shadow: 0 1px 0 #1e0a3c; }
+
+        .cell.x { color: #60a5fa; text-shadow: 0 0 15px #3b82f6; }
+        .cell.o { color: #ef4444; text-shadow: 0 0 15px #ef4444; }
+
+        .cell.win {
+            background: linear-gradient(145deg, #15803d, #064e3b);
+            border-color: #22c55e;
+            animation: pulseWin 0.5s infinite alternate;
+        }
+        @keyframes pulseWin {
+            from { transform: scale(1); box-shadow: 0 0 10px #22c55e; }
+            to { transform: scale(1.05); box-shadow: 0 0 25px #22c55e; }
+        }
+
+        .btn-restart {
+            background: linear-gradient(to bottom, #fbbf24, #d97706);
+            border: 2px solid #fff;
+            border-radius: 15px;
+            padding: 15px 40px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #000;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #92400e;
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .btn-restart:active { transform: translateY(4px); box-shadow: 0 1px 0 #92400e; }
+
+        .btn-back {
+            background: linear-gradient(to bottom, #ef4444, #b91c1c);
+            border: 2px solid #fca5a5;
+            border-radius: 10px;
+            padding: 10px 20px;
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #7f1d1d;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn-back:active { transform: translateY(3px); box-shadow: 0 1px 0 #7f1d1d; }
     </style>
 </head>
 <body>
+
 <div class="app-container">
     
-    <div class="social-section">
-        <div class="social-title">✨ تابعنا والعب معنا ✨</div>
-        <a href="https://rubika.ir/UIIXUIl" target="_blank" class="btn-social btn-channel-main">
-            <span>📢 قناة لحظة إدراك</span>
-            <span>🚀</span>
-        </a>
-        <a href="https://rubika.ir/llUoUll" target="_blank" class="btn-social btn-channel-second">
-            <span>🌟 هل أنت بخير</span>
-            <span>💜</span>
-        </a>
-        <a href="https://rubika.ir/AboSabirBot" target="_blank" class="btn-social btn-bot">
-            <span>🤖 بوت الألعاب</span>
-            <span>🎮</span>
-        </a>
-        <a href="https://rubika.ir/AboSabir" target="_blank" class="btn-social btn-bot-channel">
-            <span>📱 قناة البوت</span>
-            <span>🤖</span>
-        </a>
+    <!-- ================= صفحه اصلی ================= -->
+    <div id="mainPage">
+        <div class="social-section">
+            <div class="social-title">✨ تابعنا والعب معنا ✨</div>
+            <a href="https://rubika.ir/UIIXUIl" target="_blank" class="btn-social btn-channel-main">
+                <span>📢 قناة لحظة إدراك</span>
+                <span>🚀</span>
+            </a>
+            <a href="https://rubika.ir/llUoUll" target="_blank" class="btn-social btn-channel-second">
+                <span>🌟 هل أنت بخير</span>
+                <span>💜</span>
+            </a>
+            <a href="https://rubika.ir/AboSabirBot" target="_blank" class="btn-social btn-bot">
+                <span>🤖 بوت الألعاب</span>
+                <span>🎮</span>
+            </a>
+            <a href="https://rubika.ir/AboSabir" target="_blank" class="btn-social btn-bot-channel">
+                <span>📱 قناة البوت</span>
+                <span>🤖</span>
+            </a>
+        </div>
+
+        <div class="logo-section">
+            <h1>قناة لحظه ادراك</h1>
+            <div class="channel-id">- rubik . @UIIXUIl '𖣂</div>
+        </div>
+
+        <div class="games-grid">
+            <div class="game-card" onclick="openGame('حافظه')">
+                <div class="game-emoji" style="font-size: 45px; text-shadow: 0 0 15px rgba(192, 132, 252, 0.5);">🧠</div>
+                <div class="game-title">لعبة التصاوير</div>
+                <div class="game-desc">اكتشف الأزواج</div>
+            </div>
+            
+            <div class="game-card" onclick="openGame('حجر ورقة مقص')">
+                <div class="game-emoji" style="font-size: 38px; letter-spacing: 2px;">🪨📝✂️</div>
+                <div class="game-title">حجر ورقة مقص</div>
+                <div class="game-desc">العب بذكاء</div>
+            </div>
+            
+            <div class="game-card" onclick="openGame('بمب')">
+                <div class="game-emoji">💣</div>
+                <div class="game-title">بمب</div>
+                <div class="game-desc">كن الأسرع</div>
+            </div>
+            
+            <div class="game-card" onclick="openGame('X O')">
+                <img src="https://cdn-icons-png.flaticon.com/512/566/566294.png" class="game-img">
+                <div class="game-title">X O</div>
+                <div class="game-desc">العب ضد الكمبيوتر</div>
+            </div>
+            
+            <div class="game-card" onclick="openGame('لو خيروك')">
+                <div class="game-emoji" style="color: #fbbf24; text-shadow: 0 0 15px #fbbf24;">❓</div>
+                <div class="game-title">لو خيروك</div>
+                <div class="game-desc">اختر بحكمة</div>
+            </div>
+            
+            <div class="game-card" onclick="openGame('ترتيب الحروف')">
+                <div class="game-emoji" style="font-size: 22px; font-weight: 900; color: #c084fc; text-shadow: 0 0 10px rgba(192, 132, 252, 0.5);">ترتيب الحروف</div>
+                <div class="game-desc">بلا حدود</div>
+            </div>
+
+            <div class="game-card" onclick="openGame('خمن الدولة')">
+                <div class="game-emoji" style="text-shadow: 0 0 15px rgba(74, 222, 128, 0.5);">🌍</div>
+                <div class="game-title">خمن الدولة</div>
+                <div class="game-desc">اعرف الأعلام</div>
+            </div>
+
+            <div class="game-card" onclick="openGame('خمن الشيء')">
+                <div class="game-emoji" style="text-shadow: 0 0 15px rgba(251, 191, 36, 0.5);">🎲</div>
+                <div class="game-title">خمن الشيء</div>
+                <div class="game-desc">اعرف الأشياء</div>
+            </div>
+        </div>
     </div>
 
-    <div class="logo-section">
-        <h1>قناة لحظه ادراك</h1>
-        <div class="channel-id">- rubik . @UIIXUIl '𖣂</div>
+    <!-- ================= صفحه بازی X O ================= -->
+    <div id="xoPage">
+        <div class="xo-header-title">X O 🎮</div>
+
+        <div class="menu-container" id="xoMainMenu">
+            <button class="btn-menu" onclick="startGameMode('bot')">🤖 بازی با ربات</button>
+            <button class="btn-menu" onclick="startGameMode('local')">👥 دو نفره (یک دستگاه)</button>
+            <button class="btn-menu" onclick="showOnlineMenu()">🌐 دو نفره آنلاین</button>
+        </div>
+
+        <div class="online-box" id="onlineMenu">
+            <button class="btn-menu" style="padding:10px; font-size:16px;" onclick="createRoom()">ساخت اتاق جدید</button>
+            <input type="text" id="roomCodeInput" placeholder="کد اتاق را وارد کنید">
+            <button class="btn-menu" style="padding:10px; font-size:16px;" onclick="joinRoom()">ورود به اتاق</button>
+            <div class="room-info" id="roomInfo"></div>
+            <button class="btn-back" style="justify-content:center; margin-top:10px;" onclick="backToXoMenu()">بازگشت</button>
+        </div>
+
+        <div class="xo-status" id="statusText">اختر وضعية اللعب</div>
+
+        <div class="board" id="board">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+
+        <button class="btn-restart" id="restartBtn" onclick="resetBoard()">🔄 العب مرة أخرى</button>
+        
+        <!-- دکمه بازگشت به لیست بازی ها -->
+        <a class="btn-back" onclick="closeGame()">🔙 العودة للرئيسية</a>
     </div>
 
-    <div class="games-grid">
-        <div class="game-card" onclick="openGame('حافظه')">
-            <div class="game-emoji" style="font-size: 45px; text-shadow: 0 0 15px rgba(192, 132, 252, 0.5);">🧠</div>
-            <div class="game-title">لعبة التصاوير</div>
-            <div class="game-desc">اكتشف الأزواج</div>
-        </div>
-        
-        <div class="game-card" onclick="openGame('حجر ورقة مقص')">
-            <div class="game-emoji" style="font-size: 38px; letter-spacing: 2px;">🪨📝✂️</div>
-            <div class="game-title">حجر ورقة مقص</div>
-            <div class="game-desc">العب بذكاء</div>
-        </div>
-        
-        <div class="game-card" onclick="openGame('بمب')">
-            <div class="game-emoji">💣</div>
-            <div class="game-title">بمب</div>
-            <div class="game-desc">كن الأسرع</div>
-        </div>
-        
-        <div class="game-card" onclick="openGame('X O')">
-            <img src="https://cdn-icons-png.flaticon.com/512/566/566294.png" class="game-img">
-            <div class="game-title">X O</div>
-            <div class="game-desc">العب ضد الكمبيوتر</div>
-        </div>
-        
-        <div class="game-card" onclick="openGame('لو خيروك')">
-            <div class="game-emoji" style="color: #fbbf24; text-shadow: 0 0 15px #fbbf24;">❓</div>
-            <div class="game-title">لو خيروك</div>
-            <div class="game-desc">اختر بحكمة</div>
-        </div>
-        
-        <div class="game-card" onclick="openGame('ترتيب الحروف')">
-            <div class="game-emoji" style="font-size: 22px; font-weight: 900; color: #c084fc; text-shadow: 0 0 10px rgba(192, 132, 252, 0.5);">ترتيب الحروف</div>
-            <div class="game-desc">بلا حدود</div>
-        </div>
-
-        <!-- بازی پرچم -->
-        <div class="game-card" onclick="openGame('خمن الدولة')">
-            <div class="game-emoji" style="text-shadow: 0 0 15px rgba(74, 222, 128, 0.5);">🌍</div>
-            <div class="game-title">خمن الدولة</div>
-            <div class="game-desc">اعرف الأعلام</div>
-        </div>
-
-        <!-- بازی اشیا -->
-        <div class="game-card" onclick="openGame('خمن الشيء')">
-            <div class="game-emoji" style="text-shadow: 0 0 15px rgba(251, 191, 36, 0.5);">🎲</div>
-            <div class="game-title">خمن الشيء</div>
-            <div class="game-desc">اعرف الأشياء</div>
-        </div>
-
-    </div>
 </div>
 
-<div class="bottom-nav">
+<!-- ================= نوار پایین ================= -->
+<div class="bottom-nav" id="bottomNav">
     <div class="nav-item active"><span class="nav-icon">🏠</span>الرئيسية</div>
     <div class="nav-item"><span class="nav-icon">🎁</span>الجوائز</div>
     <div class="nav-item"><span class="nav-icon">🏆</span>الترتيب</div>
@@ -168,27 +364,113 @@
 </div>
 
 <script>
+    // ================= توابع صفحه اصلی =================
     function openGame(gameName) {
-        if (gameName === 'بمب') {
-            window.location.href = 'bomb.html';
-        } else if (gameName === 'حجر ورقة مقص') {
-            window.location.href = 'rps.html';
-        } else if (gameName === 'لو خيروك') {
-            window.location.href = 'would.html';
-        } else if (gameName === 'ترتيب الحروف') {
-            window.location.href = 'words.html';
-        } else if (gameName === 'X O') {
-            window.location.href = 'x_o.html';
-        } else if (gameName === 'حافظه') {
-            window.location.href = 'memory.html';
-        } else if (gameName === 'خمن الدولة') {
-            window.location.href = 'flag.html';
-        } else if (gameName === 'خمن الشيء') {
-            window.location.href = 'fruit.html';
-        } else {
-            alert("لعبة " + gameName + " قريباً جداً! 🎮");
-        }
+        if (gameName === 'X O') {
+            document.getElementById('mainPage').style.display = 'none';
+            document.getElementById('bottomNav').style.display = 'none';
+            document.getElementById('xoPage').style.display = 'flex';
+            backToXoMenu();
+        } 
+        else if (gameName === 'بمب') { window.location.href = 'bomb.html'; } 
+        else if (gameName === 'حجر ورقة مقص') { window.location.href = 'rps.html'; } 
+        else if (gameName === 'لو خيروك') { window.location.href = 'would.html'; } 
+        else if (gameName === 'ترتيب الحروف') { window.location.href = 'words.html'; } 
+        else if (gameName === 'حافظه') { window.location.href = 'memory.html'; } 
+        else if (gameName === 'خمن الدولة') { window.location.href = 'flag.html'; } 
+        else if (gameName === 'خمن الشيء') { window.location.href = 'fruit.html'; } 
+        else { alert("لعبة " + gameName + " قريباً جداً! 🎮"); }
     }
-</script>
-</body>
-</html>
+
+    function closeGame() {
+        if (conn) conn.close();
+        if (peer) peer.destroy();
+        document.getElementById('xoPage').style.display = 'none';
+        document.getElementById('mainPage').style.display = 'block';
+        document.getElementById('bottomNav').style.display = 'flex';
+    }
+
+    // ================= متغیرهای بازی X O =================
+    const statusText = document.getElementById('statusText');
+    const cells = document.querySelectorAll('.cell');
+    const restartBtn = document.getElementById('restartBtn');
+    const xoMainMenu = document.getElementById('xoMainMenu');
+    const onlineMenu = document.getElementById('onlineMenu');
+    const boardDiv = document.getElementById('board');
+    const roomInfo = document.getElementById('roomInfo');
+    
+    let boardState = ['', '', '', '', '', '', '', '', ''];
+    let gameActive = true;
+    let currentMode = 'local'; 
+    let currentPlayer = 'X';
+    let botTimeout = null;
+
+    let peer = null;
+    let conn = null;
+    let mySymbol = 'X';
+    let isOnline = false;
+    let roomId = null;
+
+    const winConditions = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], 
+        [0, 3, 6], [1, 4, 7], [2, 5, 8], 
+        [0, 4, 8], [2, 4, 6]             
+    ];
+
+    const botWinMessages = ["ههههه! فرت عليك! 😂 تلعب مثل الأطفال!", "الكمبيوتر دائماً يفوز! 😎 لا تحاول مجدداً!", "خسرت! 🏆 أنا الأسطورة الحقيقية هنا!"];
+    const humanWinMessages = ["😡 حسناً حسناً.. لقد فزت! بس المرة الجاية سأسحقك!", "أوه! 🥊 ضربة حظ.. دور آخر وسأريك من أنا!", "لا تفرح! 💢 هذه مجرد بداية، سأنتقم!"];
+    const drawMessages = ["🤝 تعادل! لكنني سأفوز في المرة القادمة!", "تعادل.. 🤨 أنت أفضل مما توقعت!", "لا فائز! 🎯 لكن المرة القادمة لن أرحمك!"];
+
+    function startGameMode(mode) {
+        currentMode = mode;
+        isOnline = false;
+        xoMainMenu.style.display = 'none';
+        onlineMenu.style.display = 'none';
+        boardDiv.style.display = 'grid';
+        resetBoard();
+    }
+
+    function showOnlineMenu() {
+        xoMainMenu.style.display = 'none';
+        onlineMenu.style.display = 'flex';
+        statusText.innerText = "اختر إنشاء غرفة أو الانضمام إليها";
+        boardDiv.style.display = 'none';
+    }
+
+    function backToXoMenu() {
+        if (botTimeout) clearTimeout(botTimeout);
+        if (conn) conn.close();
+        if (peer) peer.destroy();
+        xoMainMenu.style.display = 'flex';
+        onlineMenu.style.display = 'none';
+        boardDiv.style.display = 'none';
+        restartBtn.style.display = 'none';
+        roomInfo.innerText = "";
+        document.getElementById('roomCodeInput').value = "";
+        statusText.innerText = "اختر وضعية اللعب";
+        isOnline = false;
+    }
+
+    function resetBoard() {
+        if (botTimeout) clearTimeout(botTimeout);
+        boardState = ['', '', '', '', '', '', '', '', ''];
+        gameActive = true;
+        currentPlayer = 'X';
+        restartBtn.style.display = 'none';
+        
+        cells.forEach(cell => {
+            cell.innerText = '';
+            cell.className = 'cell'; 
+        });
+
+        if (currentMode === 'bot') {
+            statusText.innerText = "دورك! اختر مربعاً (أنت X)";
+            statusText.style.color = "#fbbf24";
+        } else if (currentMode === 'local') {
+            statusText.innerText = "دور اللاعب X";
+            statusText.style.color = "#60a5fa";
+        } else if (currentMode === 'online') {
+            if (mySymbol === 'X') statusText.innerText = "أنت X - دورك";
+            else statusText.innerText = "أنت O - انتظر دورك";
+        }
+   
