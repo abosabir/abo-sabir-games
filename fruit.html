@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خمّن الشيء | لحظة إدراك</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Cairo', Tahoma, Arial, sans-serif;
+            background: #0b0414;
+            color: #e2e8f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+        }
+        .game-container {
+            background: rgba(30, 15, 50, 0.8);
+            border: 1px solid #6b21a8;
+            border-radius: 24px;
+            padding: 20px 24px 28px;
+            width: 100%;
+            max-width: 480px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(107, 33, 168, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .back-btn {
+            background: rgba(76, 29, 149, 0.4);
+            color: #a78bfa;
+            border: 1px solid #4c1d95;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-size: 1.2rem;
+        }
+        .header-center { display: flex; align-items: center; gap: 10px; }
+        .lives { display: flex; gap: 4px; font-size: 1.2rem; }
+        .heart.lost { opacity: 0.2; filter: grayscale(1); }
+
+        h1 { font-size: 1.5rem; margin-bottom: 14px; color: #fbbf24; }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            background: #170a28;
+            border: 1px solid #4c1d95;
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 14px;
+            font-size: 0.8rem;
+        }
+        .stat-item { text-align: center; }
+        .stat-item .label { color: #a78bfa; display: block; margin-bottom: 2px; font-size: 0.75rem; }
+        .stat-item .value { color: #fbbf24; font-weight: 800; font-size: 1.1rem; }
+        .stat-item .value.combo { color: #f97316; }
+        .stat-item .value.record { color: #38bdf8; }
+
+        .timer-wrap {
+            background: #170a28;
+            border-radius: 8px;
+            height: 8px;
+            margin-bottom: 14px;
+            overflow: hidden;
+            border: 1px solid #4c1d95;
+        }
+        .timer-bar {
+            height: 100%;
+            width: 100%;
+            background: #22c55e;
+            transition: width 0.1s linear, background 0.3s;
+        }
+        .timer-bar.warn { background: #f59e0b; }
+        .timer-bar.danger { background: #ef4444; }
+
+        .flag-wrapper {
+            background: #170a28;
+            border: 2px solid #4c1d95;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 18px;
+            height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .flag-emoji {
+            font-size: 100px;
+            line-height: 1;
+            user-select: none;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .option-btn {
+            background: rgba(76, 29, 149, 0.4);
+            color: #e2e8f0;
+            border: 2px solid #4c1d95;
+            border-radius: 12px;
+            padding: 12px 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+            line-height: 1.4;
+        }
+        .option-btn:hover:not(:disabled) {
+            background: rgba(107, 33, 168, 0.6);
+            border-color: #a855f7;
+        }
+        .option-btn:disabled { cursor: default; }
+        .option-btn.correct {
+            background: rgba(22, 101, 52, 0.8);
+            border-color: #22c55e;
+        }
+        .option-btn.wrong {
+            background: rgba(127, 29, 29, 0.8);
+            border-color: #ef4444;
+        }
+        .option-btn .ar { display: block; font-weight: bold; }
+        .option-btn .fa { display: block; font-size: 0.8rem; color: #a78bfa; margin-top: 2px; }
+        .option-btn.correct .fa, .option-btn.wrong .fa { color: #e2e8f0; }
+
+        .message {
+            min-height: 26px;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            font-weight: bold;
+        }
+        .message.correct-msg { color: #4ade80; }
+        .message.wrong-msg { color: #f87171; }
+        .message.timeout-msg { color: #fbbf24; }
+
+        .next-btn {
+            background: #fbbf24;
+            color: #0b0414;
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: 800;
+            font-family: inherit;
+            cursor: pointer;
+            width: 100%;
+        }
+        .next-btn:disabled { background: #4c1d95; color: #a78bfa; cursor: default; }
+
+        .gameover {
+            position: absolute;
+            inset: 0;
+            background: rgba(11, 4, 20, 0.97);
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            gap: 12px;
+            z-index: 10;
+            border: 2px solid #6b21a8;
+        }
+        .gameover h2 { color: #fbbf24; font-size: 1.8rem; font-weight: 800; }
+        .gameover .final-score { color: #a855f7; font-size: 3rem; font-weight: bold; }
+        .gameover .final-label { color: #a78bfa; font-size: 0.9rem; }
+        .restart-btn {
+            background: #fbbf24;
+            color: #0b0414;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 40px;
+            font-size: 1rem;
+            font-weight: 800;
+            font-family: inherit;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div class="game-header">
+        <a href="index.html" class="back-btn">↩</a>
+        <div class="header-center">
+            <div class="lives" id="livesContainer">
+                <span class="heart">❤️</span>
+                <span class="heart">❤️</span>
+                <span class="heart">❤️</span>
+            </div>
+        </div>
+    </div>
+
+    <h1>🎲 خمّن الشيء</h1>
+    
+    <div class="stats">
+        <div class="stat-item"><span class="label">النقاط</span><span class="value" id="score">0</span></div>
+        <div class="stat-item"><span class="label">التتابع</span><span class="value combo" id="combo">0</span></div>
+        <div class="stat-item"><span class="label">الرقم القياسي</span><span class="value record" id="record">0</span></div>
+    </div>
+
+    <div class="timer-wrap"><div class="timer-bar" id="timerBar"></div></div>
+
+    <div class="flag-wrapper"><div class="flag-emoji" id="itemEmoji"></div></div>
+
+    <div class="options" id="optionsContainer"></div>
+
+    <div class="message" id="message"></div>
+
+    <button class="next-btn" id="nextBtn" disabled>السؤال التالي</button>
+
+    <div class="gameover hidden" id="gameOver">
+        <h2>انتهت اللعبة!</h2>
+        <div class="final-score" id="finalScore">0</div>
+        <div class="final-label">نقاطك النهائية</div>
+        <button class="restart-btn" id="restartBtn">العب مرة أخرى</button>
+    </div>
+</div>
+
+<script>
+    // اشیای خیلی شبیه به هم برای سختی بالا
+    const ITEMS = [
+        // حیوانات شبیه (سخت)
+        { ar: 'كلب', fa: 'سگ', emoji: '🐶', cat: 'dog' },
+        { ar: 'ذئب', fa: 'گرگ', emoji: '🐺', cat: 'dog' },
+        { ar: 'ثعلب', fa: 'روباه', emoji: '🦊', cat: 'dog' },
+        { ar: 'قط', fa: 'گربه', emoji: '🐱', cat: 'cat' },
+        { ar: 'نمر', fa: 'ببر', emoji: '🐯', cat: 'cat' },
+        { ar: 'أسد', fa: 'شیر', emoji: '🦁', cat: 'cat' },
+        { ar: 'فأر', fa: 'موش', emoji: '🐭', cat: 'mouse' },
+        { ar: 'جرذ', fa: 'موش صحرایی', emoji: '🐀', cat: 'mouse' },
+        { ar: 'هامستر', fa: 'همستر', emoji: '🐹', cat: 'mouse' },
+        { ar: 'دب', fa: 'خرس', emoji: '🐻', cat: 'bear' },
+        { ar: 'كوالا', fa: 'کوآلا', emoji: '🐨', cat: 'bear' },
+        { ar: 'باندا', fa: 'پاندا', emoji: '🐼', cat: 'bear' },
+
+        // میوه‌های شبیه
+        { ar: 'ليمون', fa: 'لیمو', emoji: '🍋', cat: 'citrus' },
+        { ar: 'ليمون أخضر', fa: 'لیمو سبز', emoji: '🍋‍🟩', cat: 'citrus' },
+        { ar: 'برتقال', fa: 'پرتقال', emoji: '🍊', cat: 'citrus' },
+        { ar: 'خوخ', fa: 'هلو', emoji: '🍑', cat: 'stone' },
+        { ar: 'مانجو', fa: 'انبه', emoji: '🥭', cat: 'stone' },
+        { ar: 'تفاحة', fa: 'سیب', emoji: '🍎', cat: 'pome' },
+        { ar: 'طماطم', fa: 'گوجه فرنگی', emoji: '🍅', cat: 'pome' },
+        { ar: 'فلفل أحمر', fa: 'فلفل قرمز', emoji: '🌶️', cat: 'pome' },
+
+        // وسایل نقلیه شبیه
+        { ar: 'سيارة', fa: 'ماشین', emoji: '🚗', cat: 'car' },
+        { ar: 'تاكسي', fa: 'تاکسی', emoji: '🚕', cat: 'car' },
+        { ar: 'حافلة', fa: 'اتوبوس', emoji: '🚌', cat: 'car' },
+        { ar: 'شاحنة', fa: 'کامیون', emoji: '🚚', cat: 'car' },
+        { ar: 'دراجة', fa: 'دوچرخه', emoji: '🚲', cat: 'bike' },
+        { ar: 'دراجة نارية', fa: 'موتور', emoji: '🏍️', cat: 'bike' },
+
+        // وجوه شبیه (خیلی سخت)
+        { ar: 'وجه مبتسم', fa: 'خندان', emoji: '😀', cat: 'face' },
+        { ar: 'وجه مبتسم بعينين', fa: 'خندان چشم‌باز', emoji: '😃', cat: 'face' },
+        { ar: 'وجه ضاحك', fa: 'خنده', emoji: '😄', cat: 'face' },
+        { ar: 'وجه ضاحك جداً', fa: 'خنده شدید', emoji: '😁', cat: 'face' },
+        { ar: 'وجه حزين', fa: 'ناراحت', emoji: '🙁', cat: 'sad' },
+        { ar: 'وجه عابس', fa: 'اخمو', emoji: '☹️', cat: 'sad' },
+        { ar: 'وجه باكي', fa: 'گریان', emoji: '😢', cat: 'sad' },
+        { ar: 'وجه غاضب', fa: 'عصبانى', emoji: '😠', cat: 'angry' },
+        { ar: 'وجه غاضب جداً', fa: 'خیلی عصبانی', emoji: '😡', cat: 'angry' },
+
+        // أشياء مشابهة
+        { ar: 'ساعة يد', fa: 'ساعت مچی', emoji: '⌚', cat: 'clock' },
+        { ar: 'ساعة منبه', fa: 'ساعت زنگ‌دار', emoji: '⏰', cat: 'clock' },
+        { ar: 'هاتف', fa: 'گوشی', emoji: '📱', cat: 'phone' },
+        { ar: 'حاسوب', fa: 'لپ تاپ', emoji: '💻', cat: 'phone' },
+        { ar: 'مفتاح', fa: 'کلید', emoji: '🔑', cat: 'key' },
+        { ar: 'قفل', fa: 'قفل', emoji: '🔒', cat: 'key' }
+    ];
+
+    const TIME_LIMIT = 10; // همون ۱۰ ثانیه
+    const MAX_LIVES = 3;
+
+    let currentAnswer = null;
+    let score = 0;
+    let combo = 0;
+    let record = parseInt(localStorage.getItem('itemRecord') || '0', 10);
+    let lives = MAX_LIVES;
+    let answered = false;
+    let timeLeft = TIME_LIMIT;
+    let timerId = null;
+
+    const itemEl = document.getElementById('itemEmoji');
+    const optionsEl = document.getElementById('optionsContainer');
+    const msgEl = document.getElementById('message');
+    const nextBtn = document.getElementById('nextBtn');
+    const scoreEl = document.getElementById('score');
+    const comboEl = document.getElementById('combo');
+    const recordEl = document.getElementById('record');
+    const timerBar = document.getElementById('timerBar');
+    const heartsEl = document.getElementById('livesContainer');
+    const gameOverEl = document.getElementById('gameOver');
+    const finalScoreEl = document.getElementById('finalScore');
+    const restartBtn = document.getElementById('restartBtn');
+
+    recordEl.textContent = record;
+
+    function shuffle(arr) {
+        let currentIndex = arr.length, randomIndex;
+        while (currentIndex != 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [arr[currentIndex], arr[randomIndex]] = [arr[randomIndex], arr[currentIndex]];
+        }
+        return arr;
+    }
+
+    function updateHearts() {
+        const hearts = heartsEl.querySelectorAll('.heart');
+        hearts.forEach((h, i) => {
+            if (i < lives) h.classList.remove('lost');
+            else h.classList.add('lost');
+        });
+    }
+
+    function startTimer() {
+        clearInterval(timerId);
+        timeLeft = TIME_LIMIT;
+        timerBar.style.width = '100%';
+        timerBar.className = 'timer-bar';
+        
+        timerId = setInterval(() => {
+            timeLeft -= 0.1;
+            let pct = (timeLeft / TIME_LIMIT) * 100;
+            timerBar.style.width = pct + '%';
+            
+            if (pct <= 30) timerBar.className = 'timer-bar danger';
+            else if (pct <= 60) timerBar.className = 'timer-bar warn';
+            
+            if (timeLeft <= 0) {
+                clearInterval(timerId);
+                handleTimeout();
+            }
+        }, 100);
+    }
+
+    function handleTimeout() {
+        if (answered) return;
+        answered = true;
+        combo = 0;
+        comboEl.textContent = 0;
+        
+        Array.from(optionsEl.children).forEach(b => {
+            b.disabled = true;
+            if (b.dataset.name === currentAnswer.ar) b.classList.add('correct');
+        });
+        
+        msgEl.textContent = `⏰ انتهى الوقت! الإجابة: ${currentAnswer.ar} — ${currentAnswer.fa}`;
+        msgEl.className = 'message timeout-msg';
+        
+        loseLife();
+    }
+
+    function loseLife() {
+        lives--;
+        updateHearts();
+        if (lives <= 0) {
+            setTimeout(endGame, 800);
+        } else {
+            nextBtn.disabled = false;
+        }
+    }
+
+    function newQuestion() {
+        if (lives <= 0) return;
+        
+        answered = false;
+        msgEl.textContent = '';
+        msgEl.className = 'message';
+        nextBtn.disabled = true;
+        optionsEl.innerHTML = '';
+        
+        currentAnswer = ITEMS[Math.floor(Math.random() * ITEMS.length)];
+        itemEl.textContent = currentAnswer.emoji;
+        
+        // پیدا کردن گزینه‌های غلط از همون دسته (حتماً شبیه به هم)
+        let wrongs = ITEMS.filter(c => c.ar !== currentAnswer.ar && c.cat === currentAnswer.cat);
+        
+        // اگه از همون دسته به اندازه کافی نبود، از کل لیست پر می‌کنیم
+        if (wrongs.length < 3) {
+            let others = ITEMS.filter(c => c.ar !== currentAnswer.ar && c.cat !== currentAnswer.cat);
+            wrongs = wrongs.concat(shuffle(others).slice(0, 3 - wrongs.length));
+        }
+        
+        shuffle(wrongs);
+        wrongs = wrongs.slice(0, 3);
+        
+        let options = [currentAnswer, ...wrongs];
+        shuffle(options);
+        
+        options.forEach(c => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerHTML = `<span class="ar">${c.ar}</span><span class="fa">${c.fa}</span>`;
+            btn.dataset.name = c.ar;
+            btn.onclick = () => checkAnswer(btn, c.ar);
+            optionsEl.appendChild(btn);
+        });
+        
+        startTimer();
+    }
+
+    function checkAnswer(btn, chosen) {
+        if (answered) return;
+        answered = true;
+        clearInterval(timerId);
+        
+        Array.from(optionsEl.children).forEach(b => b.disabled = true);
+        
+        if (chosen === currentAnswer.ar) {
+            btn.classList.add('correct');
+            combo++;
+            let points = 10 * combo;
+            score += points;
+            scoreEl.textContent = score;
+            comboEl.textContent = combo;
+            msgEl.textContent = `✅ صحيح! +${points} نقاط`;
+            msgEl.className = 'message correct-msg';
+            nextBtn.disabled = false;
+        } else {
+            btn.classList.add('wrong');
+            combo = 0;
+            comboEl.textContent = 0;
+            msgEl.textContent = `❌ خطأ! الإجابة: ${currentAnswer.ar}`;
+            msgEl.className = 'message wrong-msg';
+            
+            Array.from(optionsEl.children).forEach(b => {
+                if (b.dataset.name === currentAnswer.ar) b.classList.add('correct');
+            });
+            
+            loseLife();
+        }
+    }
+
+    function endGame() {
+        clearInterval(timerId);
+        if (score > record) {
+            record = score;
+            localStorage.setItem('itemRecord', record);
+            recordEl.textContent = record;
+        }
+        finalScoreEl.textContent = score;
+        gameOverEl.classList.remove('hidden');
+    }
+
+    function resetGame() {
+        score = 0;
+        combo = 0;
+        lives = MAX_LIVES;
+        scoreEl.textContent = 0;
+        comboEl.textContent = 0;
+        updateHearts();
+        gameOverEl.classList.add('hidden');
+        newQuestion();
+    }
+
+    nextBtn.onclick = newQuestion;
+    restartBtn.onclick = resetGame;
+
+    newQuestion();
+</script>
+</body>
+  </html>
