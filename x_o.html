@@ -160,8 +160,9 @@
     <div class="header-title">X O 🎮</div>
     
     <div class="menu-container" id="mainMenu">
-        <button class="btn-menu" onclick="startGame('normal')">😊 عادي (60%)</button>
-        <button class="btn-menu" onclick="startGame('hard')">🔥 X O اسطوره‌ای (80%)</button>
+        <button class="btn-menu" onclick="startGame('easy')">مبتدئ</button>
+        <button class="btn-menu" onclick="startGame('medium')">محترف</button>
+        <button class="btn-menu" onclick="startGame('hard')">أسطورة</button>
     </div>
 
     <div class="timer-box" id="timerBox">⏱️ <span id="timerText">15</span>s</div>
@@ -194,7 +195,7 @@
         
         let boardState = ['', '', '', '', '', '', '', '', ''];
         let gameActive = false;
-        let currentDifficulty = 'normal'; 
+        let currentDifficulty = 'easy'; // Default to first button
         const HUMAN = 'X'; 
         const BOT = 'O';   
 
@@ -316,10 +317,16 @@
 
         function botMove() {
             let moveIndex = -1;
-            let aiChance = (currentDifficulty === 'hard') ? 0.8 : 0.6;
+            
+            // تعیین احتمال استفاده از بهترین حرکت بر اساس سطح
+            let aiChance = 0.6; // مبتدئ
+            if (currentDifficulty === 'medium') aiChance = 0.8; // محترف
+            if (currentDifficulty === 'hard') aiChance = 0.9; // أسطورة
+            
             let useAI = Math.random() < aiChance;
 
             if (useAI) {
+                // پیدا کردن بهترین حرکت با Minimax
                 let bestScore = -Infinity;
                 for (let i = 0; i < boardState.length; i++) {
                     if (boardState[i] === '') {
@@ -333,6 +340,7 @@
                     }
                 }
             } else {
+                // حرکت تصادفی
                 let emptyCells = [];
                 boardState.forEach((val, i) => { if (val === '') emptyCells.push(i); });
                 moveIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
@@ -439,4 +447,4 @@
         }
     </script>
 </body>
-  </html>
+    </html>
