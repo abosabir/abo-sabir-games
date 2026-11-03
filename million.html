@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>من سيربح المليون - أبو صابر</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Orbitron:wght@600;700;800;900&display=swap');
+
+*{box-sizing:border-box}
+body{margin:0;background:#000;color:white;font-family:Cairo,sans-serif}
+
+#game{
+ width:100%;
+ height:100vh;
+ height:100dvh;
+ min-height:540px;
+ overflow:hidden;
+ display:flex;
+ flex-direction:column;
+ padding:8px 12px 16px;
+ position:relative;
+ background:radial-gradient(ellipse at 20% 35%,#123d66,transparent 60%),linear-gradient(145deg,#02091a,#081b39,#020817);
+ border:1px solid #174c83;
+}
+
+header{display:flex;flex-direction:column;align-items:stretch;gap:3px;flex-shrink:0}
+
+.home{
+ align-self:flex-start;
+ background:#07172e;
+ color:white;
+ border:1px solid #22c8e8;
+ border-radius:10px;
+ padding:7px 12px;
+ font:12px Cairo;
+ white-space:nowrap;
+ cursor:pointer;
+}
+
+.prize-area{width:100%;min-width:0;overflow:hidden}
+
+.prizes{
+ display:flex;
+ align-items:center;
+ gap:7px;
+ overflow-x:auto;
+ scrollbar-width:none;
+ padding:7px 3px;
+ direction:rtl;
+}
+
+.prizes::-webkit-scrollbar{display:none}
+
+.prize{
+ flex:0 0 auto;
+ min-width:76px;
+ text-align:center;
+ padding:7px 6px;
+ border-radius:11px;
+ background:linear-gradient(145deg,#24344c,#091629);
+ border:1px solid #64758a;
+ color:#e2eaf5;
+ font-size:11px;
+ font-weight:900;
+ box-shadow:inset 0 1px 3px #ffffff16;
+ transition:.3s;
+}
+
+.prize .money-icon{display:block;font-size:18px;margin-bottom:3px}
+.prize .cash{
+ display:block;
+ font-family:Orbitron,sans-serif;
+ font-size:12px;
+ font-weight:900;
+ direction:ltr;
+ white-space:nowrap;
+ color:#ffe08a;
+ text-shadow:0 0 8px #ffcb4e66;
+}
+
+.prize.active{
+ background:linear-gradient(145deg,#fff5c4,#ffd45c,#c78317);
+ color:#392000;
+ border:2px solid #fff0a8;
+ box-shadow:0 0 19px #ffcb4eaa,inset 0 0 8px #fff8cf;
+ transform:scale(1.05);
+}
+
+.prize.active .cash{color:#392000;text-shadow:none}
+.prize.done{background:linear-gradient(145deg,#174b3a,#0b3028);color:#75ffc0;border-color:#3ba77a}
+.prize.done .cash{color:#75ffc0;text-shadow:none}
+
+.info{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ color:#b8d4ed;
+ font-size:12px;
+ margin:3px 3px 0;
+ flex-shrink:0;
+}
+
+#timer{
+ color:#ffd45c;
+ border:1px solid #d7ae49;
+ padding:5px 12px;
+ border-radius:20px;
+ direction:ltr;
+ font-family:Orbitron,sans-serif;
+ font-size:12px;
+}
+
+.question{
+ flex:0 0 auto;
+ min-height:115px;
+ max-height:165px;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ text-align:center;
+ padding:12px;
+ margin:12px 0 8px;
+ border:3px solid #22c9e8;
+ border-radius:55px;
+ background:linear-gradient(110deg,#06142d,#102c50,#06142d);
+ box-shadow:0 0 20px #00c9ff55,inset 0 0 15px #00c9ff18;
+ font-size:clamp(17px,4vw,24px);
+ font-weight:900;
+ line-height:1.8;
+}
+
+/* ✅ دکمه‌های کمک */
+.top{
+ display:flex;
+ justify-content:center;
+ gap:16px;
+ margin:5px 0 10px;
+ flex-shrink:0;
+}
+
+.help{
+ width:51px;
+ height:51px;
+ border-radius:50%;
+ border:2px solid #20c8ee;
+ color:white;
+ background:#07162e;
+ font-size:15px;
+ font-weight:900;
+ font-family:Cairo;
+ box-shadow:0 0 14px #00c9ff55;
+ cursor:pointer;
+}
+
+.help:disabled{opacity:.3}
+
+/* ✅ جواب‌ها چسبیده به پایین و بدون فاصله اضافی */
+.answers{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:10px;
+ margin-top: 0;
+ margin-bottom: 0;
+ padding-top: 0;
+ flex:0 0 auto;
+}
+
+.answer{
+ min-height:70px;
+ border:2px solid #22c8e8;
+ border-radius:55px;
+ background:linear-gradient(120deg,#07162e,#102d50,#07162e);
+ color:white;
+ font-family:Cairo;
+ font-size:clamp(13px,3.5vw,18px);
+ font-weight:700;
+ padding:9px;
+ box-shadow:0 0 12px #00c9ff33;
+ cursor:pointer;
+}
+
+.answer:active{transform:scale(.97)}
+
+.answer.correct{
+ background:linear-gradient(90deg,#126c40,#32bb70);
+ border-color:#80ffb3;
+ box-shadow:0 0 18px #36ff85;
+}
+
+.answer.wrong{
+ background:linear-gradient(90deg,#861c32,#df354e);
+ border-color:#ff8096;
+}
+
+.answer:disabled{cursor:default}
+.answer.hidden-answer{visibility:hidden}
+.letter{color:#ffd45c;margin-left:5px}
+
+#message{text-align:center;color:#b9d9f2;font-size:12px;min-height:20px;margin:3px 0}
+
+/* مودال‌ها */
+.overlay{
+ position:fixed;
+ inset:0;
+ width:100%;
+ height:100%;
+ height:100dvh;
+ z-index:99999;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ padding:18px;
+ background:#020817;
+}
+
+.intro-bg{
+ position:absolute;
+ inset:0;
+ background:radial-gradient(ellipse at 50% 20%,#174b7b,transparent 60%),linear-gradient(145deg,#020817,#081a38,#020817);
+}
+
+.dialog{
+ position:relative;
+ width:min(440px,100%);
+ padding:25px 18px;
+ text-align:center;
+ background:linear-gradient(145deg,#0d2447,#061329);
+ border:2px solid #22c8e8;
+ border-radius:20px;
+ box-shadow:0 0 35px #009dce55;
+}
+
+.dialog h1{color:#ffd45c;font-size:25px}
+.dialog p{font-size:14px;line-height:2;color:#e3edfa}
+.trophy{font-size:45px}
+
+.line{
+ width:70%;
+ height:2px;
+ margin:13px auto;
+ background:linear-gradient(90deg,transparent,#ffd45c,transparent);
+}
+
+.startbtn{
+ background:linear-gradient(90deg,#c28c27,#ffe18a);
+ color:#211400;
+ border:0;
+ border-radius:14px;
+ padding:12px 35px;
+ font:900 17px Cairo;
+ cursor:pointer;
+}
+
+.secondary{
+ background:#10213b;
+ color:white;
+ border:1px solid #22c8e8;
+ padding:10px 20px;
+ border-radius:10px;
+ font:14px Cairo;
+ cursor:pointer;
+}
+
+.hidden{display:none!important}
+
+.help-dialog{width:min(420px,100%)}
+.help-title{font-size:23px!important;color:#ffd45c!important}
+
+.audience-row{
+ display:grid;
+ grid-template-columns:35px 1fr 52px;
+ gap:8px;
+ align-items:center;
+ margin:15px 0;
+ text-align:right;
+}
+
+.audience-letter{font-size:19px;color:#ffd45c;font-weight:900}
+.bar-bg{height:16px;background:#172a45;border-radius:20px;overflow:hidden}
+
+.bar-fill{
+ height:100%;
+ width:0;
+ background:linear-gradient(90deg,#10b7df,#62eaff);
+ border-radius:20px;
+ transition:width .8s;
+}
+
+.percent{font-size:18px;font-weight:900;color:#fff;direction:ltr}
+
+.phone-box{
+ border:2px solid #25c9e9;
+ border-radius:17px;
+ padding:17px;
+ margin:15px 0;
+ background:#07172e;
+}
+
+.phone-answer{
+ font-size:27px;
+ font-weight:900;
+ color:#ffe08a;
+ margin:12px 0;
+ line-height:1.8;
+}
+
+.phone-confidence{font-size:14px;color:#62eaff}
+
+@media(max-height:650px){
+ #game{padding:5px 9px 10px}
+ header{gap:2px}
+ .question{margin:5px 0;min-height:85px;max-height:125px;padding:9px}
+ .top{margin:3px 0 6px}
+ .help{width:43px;height:43px}
+ .answers{gap:8px}
+ .answer{min-height:55px}
+ #message{min-height:17px}
+ .prize{min-width:68px;padding:5px}
+ .prize .money-icon{font-size:15px}
+ .prize .cash{font-size:10px}
+}
+
+@media(max-width:360px){
+ .prize{min-width:65px;padding:6px 3px}
+ .prize .cash{font-size:10px}
+ .home{font-size:10px;padding:6px}
+ .help{width:45px;height:45px}
+ .answers{gap:7px}
+ .answer{font-size:12px;min-height:62px}
+}
+</style>
+</head>
+<body>
+<div id="game">
+<header>
+<button class="home" onclick="location.href='index.html'">الرئيسية</button>
+<div class="prize-area">
+<div class="prizes" id="prizes"></div>
+</div>
+</header>
+
+<div class="info">
+<span id="message">مرحباً بك في المسابقة</span>
+<span id="timer">01:00</span>
+</div>
+
+<div class="question" id="question">هل أنت مستعد للفوز بالمليون؟</div>
+
+<div class="top">
+<button class="help" id="half" onclick="half()">50:50</button>
+<button class="help" id="phone" onclick="phone()">☎</button>
+<button class="help" id="audience" onclick="audience()">👥</button>
+</div>
+
+<div class="answers" id="answers"></div>
+</div>
+
+<div class="overlay" id="intro">
+<div class="intro-bg"></div>
+<div class="dialog">
+<div class="trophy">🏆</div>
+<h1>من سيربح المليون؟</h1>
+<div class="line"></div>
+<p>أهلاً بك في أقوى تحدي للمعلومات العامة!</p>
+<p>15 سؤالاً تفصلك عن جائزة المليون.</p>
+<div class="line"></div>
+<p>
+⏱ الأسئلة 1-5: دقيقة لكل سؤال<br>
+⏱ الأسئلة 6-10: دقيقة ونصف<br>
+⏱ الأسئلة 11-15: عشرون دقيقة
+</p>
+<button class="startbtn" onclick="start()">ابدأ اللعبة</button>
+</div>
+</div>
+
+<div class="overlay hidden" id="audienceModal">
+<div class="intro-bg"></div>
+<div class="dialog help-dialog">
+<div class="trophy">👥</div>
+<h1 class="help-title">نتيجة تصويت الجمهور</h1>
+<p>كيف صوّت الجمهور لكل إجابة؟</p>
+<div id="audienceResults"></div>
+<button class="startbtn" onclick="closeHelp('audienceModal')">حسناً</button>
+</div>
+</div>
+
+<div class="overlay hidden" id="phoneModal">
+<div class="intro-bg"></div>
+<div class="dialog help-dialog">
+<div class="trophy">☎️</div>
+<h1 class="help-title">اتصال بصديقك</h1>
+<div class="phone-box">
+<p id="friendText">مرحباً، أعتقد أن الإجابة هي...</p>
+<div class="phone-answer" id="friendAnswer"></div>
+<div class="phone-confidence" id="friendConfidence"></div>
+</div>
+<button class="startbtn" onclick="closeHelp('phoneModal')">إنهاء المكالمة</button>
+</div>
+</div>
+
+<div class="overlay hidden" id="result">
+<div class="intro-bg"></div>
+<div class="dialog">
+<div class="trophy">🏆</div>
+<h1 id="resultTitle"></h1>
+<p id="resultText"></p>
+<button class="startbtn" onclick="start()">العب من جديد</button>
+<br><br>
+<button class="secondary" onclick="location.href='index.html'">الرئيسية</button>
+</div>
+</div>
+
+<script>
+const questions=[
+["من هو مخترع المصباح الكهربائي الذي اشتهر بتطويره؟",["توماس إديسون","غراهام بيل","إسحاق نيوتن","نيكولا تسلا"],0],
+["ما عاصمة أستراليا؟",["سيدني","كانبرا","ملبورن","بيرث"],1],
+["أي دولة تشتهر ببرج بيزا المائل؟",["فرنسا","إسبانيا","إيطاليا","اليونان"],2],
+["ما العنصر الكيميائي الذي رمزه Fe؟",["الذهب","الفضة","النحاس","الحديد"],3],
+["كم عدد أضلاع الشكل السداسي؟",["ستة","خمسة","سبعة","ثمانية"],0],
+["من رسم لوحة الموناليزا؟",["فان غوخ","ليوناردو دا فينشي","بيكاسو","رامبرانت"],1],
+["ما أكبر كوكب في المجموعة الشمسية؟",["الأرض","زحل","المشتري","نبتون"],2],
+["في أي دولة تقع مدينة مراكش؟",["مصر","تونس","الجزائر","المغرب"],3],
+["ما العضو المسؤول عن تنقية الدم من الفضلات؟",["الكليتان","المعدة","الرئتان","القلب"],0],
+["كم عدد اللاعبين في فريق كرة السلة داخل الملعب؟",["ستة","خمسة","سبعة","أربعة"],1],
+["ما العملية التي تتحول فيها المياه إلى بخار؟",["التكاثف","التجمد","التبخر","الانصهار"],2],
+["أي كوكب يشتهر بحلقاته الواضحة؟",["المريخ","عطارد","الزهرة","زحل"],3],
+["من كتب رواية البؤساء؟",["فيكتور هوغو","تشارلز ديكنز","تولستوي","دوستويفسكي"],0],
+["ما عاصمة كوريا الجنوبية؟",["طوكيو","سيول","بكين","بانكوك"],1],
+["أي حيوان يمتلك أطول رقبة؟",["الجمل","الحصان","الزرافة","الفيل"],2],
+["ما أقرب نجم إلى الأرض؟",["الشعرى","القمر","النجم القطبي","الشمس"],3],
+["في أي قارة تقع الأرجنتين؟",["أمريكا الجنوبية","أوروبا","آسيا","أفريقيا"],0],
+["ما الجهاز المستخدم لقياس الضغط الجوي؟",["الترمومتر","البارومتر","المجهر","البوصلة"],1],
+["أي بحر يفصل بين شبه الجزيرة العربية وأفريقيا؟",["البحر الأسود","بحر العرب","البحر الأحمر","بحر قزوين"],2],
+["كم عدد ألوان قوس قزح التقليدية؟",["خمسة","ستة","ثمانية","سبعة"],3],
+["ما عاصمة كندا؟",["أوتاوا","تورونتو","فانكوفر","مونتريال"],0],
+["ما اللغة الرسمية في البرازيل؟",["الإسبانية","البرتغالية","الفرنسية","الإنجليزية"],1],
+["أي من هذه الحيوانات من الثدييات؟",["التمساح","القرش","الدلفين","الأخطبوط"],2],
+["ما وحدة قياس شدة التيار الكهربائي؟",["الفولت","الواط","الأوم","الأمبير"],3],
+["من مؤلف مسرحية هاملت؟",["ويليام شكسبير","موليير","دانتي","غوته"],0],
+["ما أكبر محيط على الأرض؟",["الأطلسي","الهادئ","الهندي","المتجمد الشمالي"],1],
+["أي دولة عاصمتها بوينس آيرس؟",["البرازيل","تشيلي","الأرجنتين","بيرو"],2],
+["ما المعدن المستخدم بكثرة في الأسلاك الكهربائية؟",["الحديد","الذهب","الفضة","النحاس"],3],
+["ما اسم المجرة التي تقع فيها مجموعتنا الشمسية؟",["درب التبانة","أندروميدا","مجرة المثلث","سحابة ماجلان"],0],
+["كم عدد حجرات قلب الإنسان؟",["ثلاث","أربع","خمس","اثنتان"],1],
+["ما عاصمة سويسرا؟",["زيورخ","جنيف","برن","لوزان"],2],
+["أي دولة تقع في قارة أفريقيا؟",["الهند","اليابان","تركيا","كينيا"],3],
+["ما الحيوان المعروف بسفينة الصحراء؟",["الجمل","الحصان","الغزال","اللاما"],0],
+["أي عالم اشتهر بنظرية النسبية؟",["نيوتن","ألبرت أينشتاين","غاليليو","داروين"],1],
+["ما أكبر عضو في جسم الإنسان؟",["القلب","الكبد","الجلد","الرئة"],2],
+["ما عاصمة البرتغال؟",["مدريد","روما","أثينا","لشبونة"],3],
+["ما العلم الذي يدرس الزلازل؟",["علم الزلازل","علم الفلك","علم النبات","علم الوراثة"],0],
+["أي غاز يشكل النسبة الأكبر من الغلاف الجوي؟",["الأكسجين","النيتروجين","ثاني أكسيد الكربون","الهيدروجين"],1],
+["في أي دولة توجد أهرامات الجيزة؟",["المكسيك","السودان","مصر","العراق"],2],
+["كم عدد عظام جسم الإنسان البالغ تقريباً؟",["180","196","210","206"],3],
+["ما عاصمة النرويج؟",["أوسلو","ستوكهولم","هلسنكي","كوبنهاغن"],0],
+["ما اسم صغير الأسد؟",["مهر","شبل","جرو","حمل"],1],
+["أي آلة موسيقية تحتوي على مفاتيح؟",["الكمان","العود","البيانو","الناي"],2],
+["ما المضيق الذي يفصل آسيا عن أمريكا الشمالية؟",["جبل طارق","هرمز","البوسفور","بيرينغ"],3],
+["ما الكوكب الأقرب إلى الشمس؟",["عطارد","الزهرة","الأرض","المريخ"],0],
+["في أي مدينة يوجد برج إيفل؟",["لندن","باريس","برلين","روما"],1],
+["ما المادة التي تمنح النباتات لونها الأخضر؟",["الهيموغلوبين","الكيراتين","الكلوروفيل","الميلانين"],2],
+["ما عاصمة ماليزيا؟",["جاكرتا","مانيلا","بانكوك","كوالالمبور"],3],
+["أي محيط يقع شرق أفريقيا؟",["المحيط الهندي","الأطلسي","الهادئ","المتجمد"],0],
+["ما الجهاز المستخدم لرؤية الأجرام السماوية البعيدة؟",["المجهر","التلسكوب","البارومتر","السونار"],1],
+["أي دولة تشتهر بمدينة البتراء؟",["لبنان","سوريا","الأردن","فلسطين"],2],
+["كم ضلعاً للمثمن؟",["ستة","سبعة","تسعة","ثمانية"],3],
+["ما عاصمة ألمانيا؟",["برلين","ميونخ","فرانكفورت","هامبورغ"],0],
+["أي حيوان يضع البيض ويعد من الثدييات؟",["الكنغر","منقار البط","الدب","الحوت"],1],
+["ما العملة الرسمية في المملكة المتحدة؟",["اليورو","الدولار","الجنيه الإسترليني","الفرنك"],2],
+["أي جزء من النبات يمتص الماء من التربة؟",["الورقة","الزهرة","الثمرة","الجذر"],3],
+["من أول إنسان مشى على سطح القمر؟",["نيل أرمسترونغ","يوري غاغارين","بز ألدرن","مايكل كولينز"],0],
+["ما عاصمة العراق؟",["البصرة","بغداد","أربيل","الموصل"],1],
+["أي دولة ليست عضواً في الاتحاد الأوروبي؟",["فرنسا","ألمانيا","النرويج","إيطاليا"],2],
+["ما تحول المادة من الحالة الصلبة إلى السائلة؟",["التبخر","التكاثف","التجمد","الانصهار"],3],
+["في أي رياضة تقام بطولة ويمبلدون؟",["التنس","كرة القدم","كرة السلة","السباحة"],0]
+];
+
+const prizes=["100","200","300","500","1,000","2,000","4,000","8,000","16,000","32,000","64,000","125,000","250,000","500,000","1,000,000"];
+const letters=["أ","ب","ج","د"];
+
+let deck=[],index=0,current=null,clock=null,timeLeft=60,locked=false,used={};
+
+function shuffle(a){
+ a=a.slice();
+ for(let i=a.length-1;i>0;i--){
+  let j=Math.floor(Math.random()*(i+1));
+  [a[i],a[j]]=[a[j],a[i]];
+ }
+ return a;
+}
+
+function renderPrizes(){
+ let html="";
+ prizes.forEach((p,n)=>{
+  let cls=n===index?"active":n<index?"done":"";
+  html+=`
+  <span class="prize ${cls}" id="prize${n}">
+   <span class="money-icon">💰</span>
+   <span class="cash">$ ${p}</span>
+  </span>`;
+ });
+ document.getElementById("prizes").innerHTML=html;
+
+ let active=document.getElementById("prize"+index);
+ if(active)active.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});
+}
+
+function start(){
+ clearInterval(clock);
+ deck=shuffle(questions).slice(0,15);
+ index=0;
+ locked=false;
+ used={};
+
+ ["half","phone","audience"].forEach(id=>{
+  document.getElementById(id).disabled=false;
+ });
+
+ document.getElementById("intro").classList.add("hidden");
+ document.getElementById("result").classList.add("hidden");
+ closeHelp("phoneModal");
+ closeHelp("audienceModal");
+
+ showQuestion();
+}
+
+function showQuestion(){
+ locked=false;
+ current=deck[index];
+
+ document.getElementById("message").textContent="السؤال "+(index+1)+" من 15";
+ document.getElementById("question").textContent=current[0];
+
+ current.opts=shuffle(current[1].map((t,i)=>({t,ok:i===current[2]})));
+
+ document.getElementById("answers").innerHTML=current.opts.map((o,i)=>`
+ <button class="answer" onclick="choose(${i})">
+ <span class="letter">${letters[i]}.</span>${o.t}
+ </button>`).join("");
+
+ renderPrizes();
+ startTimer();
+}
+
+function startTimer(){
+ clearInterval(clock);
+ timeLeft=index<5?60:index<10?90:1200;
+ updateTimer();
+
+ clock=setInterval(()=>{
+  timeLeft--;
+  updateTimer();
+
+  if(timeLeft<=0){
+   clearInterval(clock);
+   locked=true;
+   document.getElementById("message").textContent="انتهى الوقت!";
+   document.querySelectorAll(".answer").forEach(b=>b.disabled=true);
+   setTimeout(()=>finish(false),1000);
+  }
+ },1000);
+}
+
+function updateTimer(){
+ let m=Math.floor(timeLeft/60),s=timeLeft%60;
+ document.getElementById("timer").textContent=
+ String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+
+ document.getElementById("timer").style.color=
+ timeLeft<=10?"#ff526a":"#ffd45c";
+}
+
+function choose(i){
+ if(locked)return;
+
+ locked=true;
+ clearInterval(clock);
+
+ let buttons=[...document.querySelectorAll(".answer")];
+ let right=current.opts.findIndex(o=>o.ok);
+
+ buttons.forEach((b,n)=>{
+  b.disabled=true;
+  if(n===right)b.classList.add("correct");
+  if(n===i&&i!==right)b.classList.add("wrong");
+ });
+
+ if(i!==right){
+  document.getElementById("message").textContent="إجابة غير صحيحة!";
+  setTimeout(()=>finish(false),1300);
+  return;
+ }
+
+ document.getElementById("message").textContent="إجابة صحيحة!";
+
+ if(index===14){
+  setTimeout(()=>finish(true),1200);
+  return;
+ }
+
+ index++;
+ setTimeout(showQuestion,1100);
+}
+
+function life(id){
+ if(locked||!current||used[id])return false;
+
+ used[id]=true;
+ document.getElementById(id).disabled=true;
+ return true;
+}
+
+function half(){
+ if(!life("half"))return;
+
+ let wrong=shuffle(
+  current.opts.map((o,i)=>o.ok?-1:i).filter(i=>i>=0)
+ ).slice(0,2);
+
+ wrong.forEach(i=>{
+  document.querySelectorAll(".answer")[i].classList.add("hidden-answer");
+ });
+
+ document.getElementById("message").textContent="تم حذف إجابتين";
+}
+
+function phone(){
+ if(!life("phone"))return;
+
+ let right=current.opts.findIndex(o=>o.ok);
+ let answer=current.opts[right].t;
+ let confidence=75+Math.floor(Math.random()*21);
+
+ document.getElementById("friendText").textContent=
+ "مرحباً! فكرت في السؤال، وأعتقد أن الإجابة الصحيحة هي:";
+
+ document.getElementById("friendAnswer").textContent=
+ letters[right]+" - "+answer;
+
+ document.getElementById("friendConfidence").textContent=
+ "نسبة ثقتي بالإجابة: "+confidence+"٪";
+
+ document.getElementById("phoneModal").classList.remove("hidden");
+}
+
+function audience(){
+ if(!life("audience"))return;
+
+ let right=current.opts.findIndex(o=>o.ok);
+ let result=[0,0,0,0];
+
+ let correct=55+Math.floor(Math.random()*26);
+ result[right]=correct;
+
+ let remain=100-correct;
+ let others=[0,1,2,3].filter(i=>i!==right);
+
+ let first=Math.floor(Math.random()*(remain+1));
+ let second=Math.floor(Math.random()*(remain-first+1));
+
+ result[others[0]]=first;
+ result[others[1]]=second;
+ result[others[2]]=remain-first-second;
+
+ document.getElementById("audienceResults").innerHTML=
+ result.map((x,i)=>`
+ <div class="audience-row">
+ <span class="audience-letter">${letters[i]}</span>
+ <div class="bar-bg">
+  <div class="bar-fill" style="width:${x}%"></div>
+ </div>
+ <span class="percent">${x}%</span>
+ </div>`).join("");
+
+ document.getElementById("audienceModal").classList.remove("hidden");
+}
+
+function closeHelp(id){
+ document.getElementById(id).classList.add("hidden");
+}
+
+function finish(won){
+ clearInterval(clock);
+
+ let money = won ? prizes[14] : (index>0 ? prizes[index-1] : "0");
+
+ document.getElementById("resultTitle").textContent =
+ won ? "🏆 مبروك! ربحت المليون!" : "انتهت اللعبة";
+
+ document.getElementById("resultText").textContent =
+ won
+  ? "أنت الآن مليونير! ربحت " + prizes[14] + " دولار."
+  : "للأسف خسرت، لكنك ربحت " + money + " دولار. حاول مرة أخرى!";
+
+ document.getElementById("result").classList.remove("hidden");
+}
+</script>
+</body>
+  </html>
